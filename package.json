@@ -1,0 +1,23 @@
+{
+  "name": "monkeyscript",
+  "version": "1.0.0",
+  "description": "monkey language interpreter",
+  "main": "main.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/iamBharatManral/monkeyscript"
+  },
+  "keywords": [
+    "monkey",
+    "typescript",
+    "interpreter"
+  ],
+  "author": "Bharat Manral",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
