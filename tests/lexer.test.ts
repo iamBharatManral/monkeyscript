@@ -2,7 +2,7 @@ import Lexer from '../src/frontend/lexer'
 import { Token, TokenType } from '../src/frontend/token'
 import assert from 'assert'
 
-describe('testing nextToken()', () => {
+describe('testing lexer', () => {
 
   test('random tokens', () => {
     const input = "=+(){},;";

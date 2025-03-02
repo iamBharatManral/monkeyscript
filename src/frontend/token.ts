@@ -48,3 +48,25 @@ export const Keywords: { [key: string]: TokenType } = {
   else: TokenType.ELSE,
   return: TokenType.RETRUN,
 }
+
+
+export enum Precedence {
+  LOWEST = 1,
+  EQ = 2,
+  LTGT = 3,
+  SUM = 4,
+  PRODUCT = 5,
+  PREFIX = 6,
+  CALL = 7
+}
+
+export const PrecedenceTable: Partial<Record<TokenType, Precedence>> = {
+  [TokenType.EQ]: Precedence.EQ,
+  [TokenType.NE]: Precedence.EQ,
+  [TokenType.LT]: Precedence.LTGT,
+  [TokenType.GT]: Precedence.LTGT,
+  [TokenType.PLUS]: Precedence.SUM,
+  [TokenType.MINUS]: Precedence.SUM,
+  [TokenType.ASTERISK]: Precedence.PRODUCT,
+  [TokenType.SLASH]: Precedence.PRODUCT,
+}

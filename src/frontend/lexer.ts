@@ -1,8 +1,8 @@
 import { Keywords, Token, TokenType } from "./token";
-import { Option } from '../types';
+import { Optional } from '../types';
 
 export default class Lexer {
-  constructor(private source: string, private position: number = 0, private readPosition: number = 0, private char: Option<string> = "") {
+  constructor(private source: string, private position: number = 0, private readPosition: number = 0, private char: Optional<string> = "") {
     this.readChar();
   }
 
@@ -96,17 +96,17 @@ export default class Lexer {
     }
   }
 
-  private peekChar(): Option<string> {
+  private peekChar(): Optional<string> {
     if (this.readPosition >= this.source.length) return null;
     return this.source[this.readPosition];
   }
 
 
-  private isDigit(char: Option<string>) {
+  private isDigit(char: Optional<string>) {
     if (char === null) return false;
     return /^\d$/.test(char);
   }
-  private isWhitespace(char: Option<string>) {
+  private isWhitespace(char: Optional<string>) {
     if (char === null) return false;
     return /^\s$/.test(char);
   }

@@ -1,1 +1,1 @@
-export type Option<T> = T | null
+export type Optional<T> = T | null
