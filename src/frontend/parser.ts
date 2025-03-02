@@ -176,7 +176,6 @@ export default class Parser {
       }
       alternative = this.parseBlockStatement()
     }
-    console.log('return new if exp')
 
     return new IfExpression(condition, consequence, alternative)
 

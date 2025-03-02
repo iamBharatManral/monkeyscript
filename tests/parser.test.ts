@@ -207,7 +207,7 @@ describe('test parser', () => {
     const parser = new Parser(lexer);
     const pg = parser.parse();
     const expected: Array<Statement> = [
-      new ExpressionStatement(new FunctionLiteral([new Identifier("x"), new Identifier("y")], new BlockStatement([new InfixExpression(new Identifier("x"), "+", new Identifier("y"))])))
+      new ExpressionStatement(new FunctionLiteral([new Identifier("x"), new Identifier("y")], new BlockStatement([new ExpressionStatement(new InfixExpression(new Identifier("x"), "+", new Identifier("y")))])))
     ];
     assert.deepStrictEqual(pg.statements, expected)
   })

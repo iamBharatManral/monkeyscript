@@ -19,50 +19,86 @@ export class Program implements Node {
 // Statements
 export class LetStatement implements Statement {
   constructor(public name: Identifier, public value: Optional<Expression>) { }
+  toString(): string {
+    return `let ${this.name} = ${this.value?.toString()}`
+  }
 }
 
 export class ReturnStatment implements Statement {
   constructor(public value: Optional<Expression>) { }
+  toString(): string {
+    return `return ${this.value?.toString()}`
+  }
 }
 
 export class ExpressionStatement implements Statement {
   constructor(public expression: Optional<Expression>) { }
+  toString(): string {
+    return `${this.expression?.toString()}`
+  }
 }
 
 export class BlockStatement implements Statement {
   constructor(public statements: Array<Statement>) { }
+  toString(): string {
+    return `${this.statements?.toString()}`
+  }
 }
 
 // Expressions
 
 export class Identifier implements Expression {
   constructor(public value: string) { }
+  toString(): string {
+    return `${this.value}`
+  }
 }
 
 export class BooleanLiternal extends Expression {
   constructor(public value: boolean) { super() }
+  toString(): string {
+    return `${this.value}`
+  }
 }
 
 export class IntegerLiteral extends Expression {
   constructor(public value: number) { super() }
+  toString(): string {
+    return `${this.value}`
+  }
 }
 
 export class PrefixExpression extends Expression {
   constructor(public operator: string, public right: Expression) { super() }
+  toString(): string {
+    return `${this.operator}${this.right.toString()}`
+  }
 }
 
 export class InfixExpression extends Expression {
   constructor(public left: Expression, public operator: string, public right: Expression) { super() }
+  toString(): string {
+    return `${this.left.toString()} ${this.operator} ${this.right.toString()}`
+  }
 }
 
 export class IfExpression extends Expression {
   constructor(public condition: Expression, private consequence: Optional<BlockStatement>, private alternative: Optional<BlockStatement>) { super() }
+  toString(): string {
+    return `if ( ${this.condition.toString()} ) { ${this.consequence?.toString()} } else { ${this.alternative?.toString()} }`
+  }
 }
 
 export class FunctionLiteral extends Expression {
-  constructor(public parameters: Array<Identifier>, body: Optional<BlockStatement>) { super() }
+  constructor(public parameters: Array<Identifier>, public body: Optional<BlockStatement>) { super() }
+  toString(): string {
+    return `fn ( ${this.parameters.toString()} ) { ${this.body?.toString()} }`
+  }
 }
 
 export class CallExpression extends Expression {
   constructor(public fn: Expression, public args: Array<Expression>) { super() }
+  toString(): string {
+    return `${this.fn.toString()} ( ${this.args.toString()} )`
+  }
 }

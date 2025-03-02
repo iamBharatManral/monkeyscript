@@ -1,6 +1,6 @@
 import readline from 'readline';
 import Lexer from './frontend/lexer';
-import { Token, TokenType } from './frontend/token';
+import Parser from './frontend/parser';
 
 const rl = readline.createInterface(
   process.stdin,
@@ -21,10 +21,16 @@ export default async function repl() {
       process.exit(0);
     }
     const lexer = new Lexer(input);
-    let tok: Token;
-    for (tok = lexer.nextToken(); tok.type !== TokenType.EOF; tok = lexer.nextToken()) {
-      console.log(tok)
+    const parser = new Parser(lexer);
+    const pg = parser.parse()
+    if (parser.errors.length > 0) {
+      for (const err of parser.errors) {
+        console.log(err)
+      }
+      continue
     }
-    console.log(tok)
+    for (const stmt of pg.statements) {
+      console.log(stmt.toString())
+    }
   }
 }
