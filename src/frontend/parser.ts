@@ -1,5 +1,5 @@
 import { Optional } from "../types";
-import { BooleanLiternal, Expression, ExpressionStatement, Identifier, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement } from "./ast";
+import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement } from "./ast";
 import { syntaxError } from "./error";
 import Lexer from "./lexer";
 import { Precedence, PrecedenceTable, Token, TokenType } from "./token";
@@ -25,6 +25,8 @@ export default class Parser {
     this.registerPrefixFunc(TokenType.LPAREN, this.parseGroupedExpression)
     this.registerPrefixFunc(TokenType.MINUS, this.parsePrefixExpression)
     this.registerPrefixFunc(TokenType.BANG, this.parsePrefixExpression)
+    this.registerPrefixFunc(TokenType.IF, this.parseIfExpression)
+    this.registerPrefixFunc(TokenType.FUNCTION, this.parseFunctionLiteral)
     this.registerInfixFunc(TokenType.PLUS, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.MINUS, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.ASTERISK, this.parseInfixExpression)
@@ -75,6 +77,89 @@ export default class Parser {
       default:
         return this.parseExpressionStatement()
     }
+  }
+
+  private parseFunctionLiteral(): Optional<Expression> {
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return null
+    }
+    const params = this.parseFunctionParameters()
+    if (!params) return null
+
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return null
+    }
+    const body = this.parseBlockStatement()
+    return new FunctionLiteral(params, body)
+
+  }
+
+  private parseFunctionParameters(): Optional<Array<Identifier>> {
+    const params: Array<Identifier> = []
+    if (this.peekTokenIs(TokenType.RPAREN)) {
+      this.nextToken()
+      return params
+    }
+    this.nextToken()
+    params.push(new Identifier(this.curToken.literal))
+    while (this.peekTokenIs(TokenType.COMMA)) {
+      this.nextToken()
+      this.nextToken()
+      params.push(new Identifier(this.curToken.literal))
+    }
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null
+    }
+    return params
+  }
+
+  private parseIfExpression(): Optional<Statement> {
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return null
+    }
+    this.nextToken()
+    const condition = this.parseExpression(Precedence.LOWEST);
+    if (!condition) {
+      return null
+    }
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null
+    }
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return null
+    }
+    const consequence = this.parseBlockStatement()
+
+    let alternative: Optional<BlockStatement> = null;
+
+    if (this.peekTokenIs(TokenType.ELSE)) {
+      this.nextToken()
+      if (!this.expectPeek(TokenType.LBRACE)) {
+        return null
+      }
+      alternative = this.parseBlockStatement()
+    }
+    console.log('return new if exp')
+
+    return new IfExpression(condition, consequence, alternative)
+
+  }
+
+  private parseBlockStatement(): Optional<BlockStatement> {
+    const stmts: Array<Statement> = [];
+    this.nextToken()
+    while (!this.curTokenIs(TokenType.RBRACE) && !this.curTokenIs(TokenType.EOF)) {
+      const stmt = this.parseStatment()
+      if (stmt) {
+        stmts.push(stmt)
+      }
+      this.nextToken()
+    }
+    return new BlockStatement(stmts)
+  }
+
+  private curTokenIs(tokenType: TokenType): boolean {
+    return this.curToken.type === tokenType;
   }
 
   private parsePrefixExpression(): Optional<Expression> {

@@ -29,6 +29,10 @@ export class ExpressionStatement implements Statement {
   constructor(public expression: Optional<Expression>) { }
 }
 
+export class BlockStatement implements Statement {
+  constructor(public statements: Array<Statement>) { }
+}
+
 // Expressions
 
 export class Identifier implements Expression {
@@ -44,12 +48,17 @@ export class IntegerLiteral extends Expression {
 }
 
 export class PrefixExpression extends Expression {
-  constructor(public operator: string, public right: Expression) {
-    super()
-  }
+  constructor(public operator: string, public right: Expression) { super() }
 }
 
 export class InfixExpression extends Expression {
   constructor(public left: Expression, public operator: string, public right: Expression) { super() }
 }
 
+export class IfExpression extends Expression {
+  constructor(public condition: Expression, private consequence: Optional<BlockStatement>, private alternative: Optional<BlockStatement>) { super() }
+}
+
+export class FunctionLiteral extends Expression {
+  constructor(public parameters: Array<Identifier>, body: Optional<BlockStatement>) { super() }
+}

@@ -1,4 +1,4 @@
-import { Statement, LetStatement, Identifier, IntegerLiteral, ReturnStatment, ExpressionStatement, PrefixExpression, InfixExpression, BooleanLiternal } from "../src/frontend/ast";
+import { Statement, LetStatement, Identifier, IntegerLiteral, ReturnStatment, ExpressionStatement, PrefixExpression, InfixExpression, BooleanLiternal, IfExpression, BlockStatement, Expression, FunctionLiteral } from "../src/frontend/ast";
 import Lexer from "../src/frontend/lexer";
 import Parser from "../src/frontend/parser";
 import assert from 'assert'
@@ -165,6 +165,49 @@ describe('test parser', () => {
       new ExpressionStatement(new InfixExpression(new IntegerLiteral(11), "<=", new IntegerLiteral(12))),
       new ExpressionStatement(new InfixExpression(new IntegerLiteral(2), ">=", new IntegerLiteral(2))),
       new ExpressionStatement(new InfixExpression(new IntegerLiteral(1), "%", new IntegerLiteral(2))),
+    ];
+    assert.deepStrictEqual(pg.statements, expected)
+  })
+
+  it('test if expression', () => {
+    const input = `
+    if (x < y) { x }
+    `;
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+    const pg = parser.parse();
+    const expected: Array<Statement> = [
+      new ExpressionStatement(new IfExpression(new InfixExpression(new Identifier("x"), "<", new Identifier("y")), new BlockStatement([new ExpressionStatement(new Identifier("x"))]), null))
+    ];
+    assert.deepStrictEqual(pg.statements, expected)
+  })
+
+  it('test if else expression', () => {
+    const input = `
+            if (x > y) {
+              x
+            } else {
+               y
+            }
+    `;
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+    const pg = parser.parse();
+    const expected: Array<Statement> = [
+      new ExpressionStatement(new IfExpression(new InfixExpression(new Identifier("x"), ">", new Identifier("y")), new BlockStatement([new ExpressionStatement(new Identifier("x"))]), new BlockStatement([new ExpressionStatement(new Identifier("y"))])))
+    ];
+    assert.deepStrictEqual(pg.statements, expected)
+  })
+
+  it('test function literal', () => {
+    const input = `
+    fn(x, y) { x + y; }
+    `;
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+    const pg = parser.parse();
+    const expected: Array<Statement> = [
+      new ExpressionStatement(new FunctionLiteral([new Identifier("x"), new Identifier("y")], new BlockStatement([new InfixExpression(new Identifier("x"), "+", new Identifier("y"))])))
     ];
     assert.deepStrictEqual(pg.statements, expected)
   })
