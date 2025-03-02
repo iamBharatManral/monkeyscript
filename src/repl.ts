@@ -1,6 +1,5 @@
 import readline from 'readline';
-import Lexer from './frontend/lexer';
-import Parser from './frontend/parser';
+import { run } from './runner';
 
 const rl = readline.createInterface(
   process.stdin,
@@ -20,17 +19,6 @@ export default async function repl() {
     if (input === ":q") {
       process.exit(0);
     }
-    const lexer = new Lexer(input);
-    const parser = new Parser(lexer);
-    const pg = parser.parse()
-    if (parser.errors.length > 0) {
-      for (const err of parser.errors) {
-        console.log(err)
-      }
-      continue
-    }
-    for (const stmt of pg.statements) {
-      console.log(stmt.toString())
-    }
+    run(input)
   }
 }
