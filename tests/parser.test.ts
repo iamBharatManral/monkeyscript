@@ -1,4 +1,4 @@
-import { Statement, LetStatement, Identifier, IntegerLiteral, ReturnStatment, ExpressionStatement, PrefixExpression, InfixExpression, BooleanLiternal, IfExpression, BlockStatement, Expression, FunctionLiteral } from "../src/frontend/ast";
+import { Statement, LetStatement, Identifier, IntegerLiteral, ReturnStatment, ExpressionStatement, PrefixExpression, InfixExpression, BooleanLiternal, IfExpression, BlockStatement, FunctionLiteral, CallExpression } from "../src/frontend/ast";
 import Lexer from "../src/frontend/lexer";
 import Parser from "../src/frontend/parser";
 import assert from 'assert'
@@ -208,6 +208,19 @@ describe('test parser', () => {
     const pg = parser.parse();
     const expected: Array<Statement> = [
       new ExpressionStatement(new FunctionLiteral([new Identifier("x"), new Identifier("y")], new BlockStatement([new InfixExpression(new Identifier("x"), "+", new Identifier("y"))])))
+    ];
+    assert.deepStrictEqual(pg.statements, expected)
+  })
+
+  it('test function call', () => {
+    const input = `
+    add(1, 2 * 3, 4 + 5);
+    `;
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+    const pg = parser.parse();
+    const expected: Array<Statement> = [
+      new ExpressionStatement(new CallExpression(new Identifier("add"), [new IntegerLiteral(1), new InfixExpression(new IntegerLiteral(2), "*", new IntegerLiteral(3)), new InfixExpression(new IntegerLiteral(4), "+", new IntegerLiteral(5))]))
     ];
     assert.deepStrictEqual(pg.statements, expected)
   })

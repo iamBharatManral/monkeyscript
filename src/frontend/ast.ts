@@ -62,3 +62,7 @@ export class IfExpression extends Expression {
 export class FunctionLiteral extends Expression {
   constructor(public parameters: Array<Identifier>, body: Optional<BlockStatement>) { super() }
 }
+
+export class CallExpression extends Expression {
+  constructor(public fn: Expression, public args: Array<Expression>) { super() }
+}

@@ -75,4 +75,5 @@ export const PrecedenceTable: Partial<Record<TokenType, Precedence>> = {
   [TokenType.MOD]: Precedence.SUM,
   [TokenType.ASTERISK]: Precedence.PRODUCT,
   [TokenType.SLASH]: Precedence.PRODUCT,
+  [TokenType.LPAREN]: Precedence.CALL,
 }

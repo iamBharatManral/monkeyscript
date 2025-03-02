@@ -1,5 +1,5 @@
 import { Optional } from "../types";
-import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement } from "./ast";
+import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement } from "./ast";
 import { syntaxError } from "./error";
 import Lexer from "./lexer";
 import { Precedence, PrecedenceTable, Token, TokenType } from "./token";
@@ -27,6 +27,7 @@ export default class Parser {
     this.registerPrefixFunc(TokenType.BANG, this.parsePrefixExpression)
     this.registerPrefixFunc(TokenType.IF, this.parseIfExpression)
     this.registerPrefixFunc(TokenType.FUNCTION, this.parseFunctionLiteral)
+    this.registerInfixFunc(TokenType.LPAREN, this.parseCallExpression)
     this.registerInfixFunc(TokenType.PLUS, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.MINUS, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.ASTERISK, this.parseInfixExpression)
@@ -77,6 +78,42 @@ export default class Parser {
       default:
         return this.parseExpressionStatement()
     }
+  }
+
+  private parseCallExpression(fn: Optional<Expression>): Optional<Expression> {
+    const args = this.parseCallArguments()
+    if (!args || !fn) {
+      return null
+    }
+    return new CallExpression(fn, args)
+  }
+
+  private parseCallArguments(): Optional<Array<Expression>> {
+    const args: Array<Expression> = []
+    if (this.peekTokenIs(TokenType.RPAREN)) {
+      this.nextToken()
+      return args
+    }
+    this.nextToken()
+    const exp = this.parseExpression(Precedence.LOWEST)
+    if (!exp) {
+      return null
+    }
+    args.push(exp)
+
+    while (this.peekTokenIs(TokenType.COMMA)) {
+      this.nextToken()
+      this.nextToken()
+      const exp = this.parseExpression(Precedence.LOWEST)
+      if (!exp) return null
+      args.push(exp)
+    }
+
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null
+    }
+
+    return args
   }
 
   private parseFunctionLiteral(): Optional<Expression> {
