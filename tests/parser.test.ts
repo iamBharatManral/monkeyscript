@@ -151,5 +151,22 @@ describe('test parser', () => {
     ];
     assert.deepStrictEqual(pg.statements, expected)
   })
+
+  it('test new mod, le, ge operator expressions', () => {
+    const input = `
+    11 <= 12;
+    2 >= 2;
+    1 % 2;
+    `;
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+    const pg = parser.parse();
+    const expected: Array<Statement> = [
+      new ExpressionStatement(new InfixExpression(new IntegerLiteral(11), "<=", new IntegerLiteral(12))),
+      new ExpressionStatement(new InfixExpression(new IntegerLiteral(2), ">=", new IntegerLiteral(2))),
+      new ExpressionStatement(new InfixExpression(new IntegerLiteral(1), "%", new IntegerLiteral(2))),
+    ];
+    assert.deepStrictEqual(pg.statements, expected)
+  })
 })
 

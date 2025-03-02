@@ -29,10 +29,13 @@ export default class Parser {
     this.registerInfixFunc(TokenType.MINUS, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.ASTERISK, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.SLASH, this.parseInfixExpression)
+    this.registerInfixFunc(TokenType.MOD, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.EQ, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.NE, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.LT, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.GT, this.parseInfixExpression)
+    this.registerInfixFunc(TokenType.LE, this.parseInfixExpression)
+    this.registerInfixFunc(TokenType.GE, this.parseInfixExpression)
   }
 
   private registerInfixFunc(tokenType: TokenType, fn: infixFunc) {

@@ -141,7 +141,9 @@ describe('testing lexer', () => {
 
   test('comparison tokens', () => {
     const input = `10 == 10;
-                   10 != 9;`;
+                   10 != 9;
+                   <= >= <
+                   `;
     const expected: Array<Token> = [
       new Token(TokenType.INT, "10"),
       new Token(TokenType.EQ, "=="),
@@ -151,6 +153,9 @@ describe('testing lexer', () => {
       new Token(TokenType.NE, "!="),
       new Token(TokenType.INT, "9"),
       new Token(TokenType.SEMICOLON, ";"),
+      new Token(TokenType.LE, "<="),
+      new Token(TokenType.GE, ">="),
+      new Token(TokenType.LT, "<"),
       new Token(TokenType.EOF, ""),
     ];
 

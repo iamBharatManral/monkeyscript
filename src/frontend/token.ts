@@ -15,9 +15,12 @@ export enum TokenType {
   BANG = "BANG",
   ASTERISK = "ASTERISK",
   SLASH = "SLASH",
+  MOD = "MOD",
 
   LT = "LT",
   GT = "GT",
+  LE = "LE",
+  GE = "GE",
   EQ = "EQ",
   NE = "NE",
 
@@ -65,8 +68,11 @@ export const PrecedenceTable: Partial<Record<TokenType, Precedence>> = {
   [TokenType.NE]: Precedence.EQ,
   [TokenType.LT]: Precedence.LTGT,
   [TokenType.GT]: Precedence.LTGT,
+  [TokenType.LE]: Precedence.LTGT,
+  [TokenType.GE]: Precedence.LTGT,
   [TokenType.PLUS]: Precedence.SUM,
   [TokenType.MINUS]: Precedence.SUM,
+  [TokenType.MOD]: Precedence.SUM,
   [TokenType.ASTERISK]: Precedence.PRODUCT,
   [TokenType.SLASH]: Precedence.PRODUCT,
 }

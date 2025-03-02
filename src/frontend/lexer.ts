@@ -22,6 +22,9 @@ export default class Lexer {
       case "/":
         token = new Token(TokenType.SLASH, this.char)
         break
+      case "%":
+        token = new Token(TokenType.MOD, this.char)
+        break
       case "!":
         if (this.peekChar() === "=") {
           token = new Token(TokenType.NE, "!=")
@@ -31,10 +34,20 @@ export default class Lexer {
         }
         break
       case "<":
-        token = new Token(TokenType.LT, this.char)
+        if (this.peekChar() === "=") {
+          token = new Token(TokenType.LE, "<=")
+          this.readChar()
+        } else {
+          token = new Token(TokenType.LT, this.char)
+        }
         break
       case ">":
-        token = new Token(TokenType.GT, this.char)
+        if (this.peekChar() === "=") {
+          token = new Token(TokenType.GE, ">=")
+          this.readChar()
+        } else {
+          token = new Token(TokenType.GT, this.char)
+        }
         break
       case ",":
         token = new Token(TokenType.COMMA, this.char)
