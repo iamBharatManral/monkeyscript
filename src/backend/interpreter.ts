@@ -1,6 +1,6 @@
-import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, IfExpression, InfixExpression, IntegerLiteral, Node, PrefixExpression, Program, Statement } from '../frontend/ast'
+import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, IfExpression, InfixExpression, IntegerLiteral, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
 import { Optional } from '../types'
-import { Integer, Null, Object, Boolean, ObjectType } from './object'
+import { Integer, Null, Object, Boolean, ObjectType, Return } from './object'
 
 const TRUE = new Boolean(true)
 const FALSE = new Boolean(false)
@@ -12,7 +12,7 @@ export default class Interpreter {
   eval(ast: Node): Object {
     switch (true) {
       case ast instanceof Program:
-        return this.evalStatements((ast as Program).statements);
+        return this.evalProgram((ast as Program).statements);
       case ast instanceof ExpressionStatement:
         return this.eval((ast as ExpressionStatement).expression as Expression);
       case ast instanceof IntegerLiteral:
@@ -24,22 +24,38 @@ export default class Interpreter {
       case ast instanceof InfixExpression:
         return this.evalInfixExpression(ast.operator, this.eval(ast.left), this.eval(ast.right))
       case ast instanceof BlockStatement:
-        return this.evalStatements(ast.statements)
+        return this.evalBlockStatements(ast)
       case ast instanceof IfExpression:
         return this.evalIfExpression(this.eval(ast.condition), ast.consequence as BlockStatement, ast.alternative)
+      case ast instanceof ReturnStatment:
+        return new Return(this.eval(ast.value as Expression))
       default:
         return NULL;
     }
+  }
+
+  evalBlockStatements(block: BlockStatement): Object {
+    let result = NULL;
+    for (const stmt of block.statements) {
+      result = this.eval(stmt)
+      if (result.type() === ObjectType.RETURN_OBJ) {
+        return result
+      }
+    }
+    return result
   }
 
   nativeBoolToBooleanObject(val: boolean) {
     return val ? TRUE : FALSE
   }
 
-  evalStatements(stmts: Array<Statement>): Object {
+  evalProgram(stmts: Array<Statement>): Object {
     let result: Object = new Null();
     for (const stmt of stmts) {
       result = this.eval(stmt)
+      if (result.type() === ObjectType.RETURN_OBJ) {
+        return result;
+      }
     }
     return result;
   }

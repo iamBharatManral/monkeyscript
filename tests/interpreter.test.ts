@@ -201,5 +201,35 @@ describe('testing interpreter', () => {
 
     }
   })
+
+  test('test eval of return stmt', () => {
+    const tests = [
+      {
+        input: "return 10;",
+        output: "10"
+      },
+      {
+        input: "return 10; 9;",
+        output: "10"
+      },
+      {
+        input: "return 2 * 5; 9;",
+        output: "10"
+      },
+      {
+        input: "9; return 2 * 5; 9;",
+        output: "10"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
 })
 
