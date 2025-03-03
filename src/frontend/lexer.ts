@@ -84,7 +84,7 @@ export default class Lexer {
         } else if (this.isDigit(this.char)) {
           return this.readNumber()
         }
-        return new Token(TokenType.ILLEGAL, "")
+        token = new Token(TokenType.ILLEGAL, this.char)
     }
     this.readChar()
     return token
