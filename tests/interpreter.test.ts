@@ -159,5 +159,47 @@ describe('testing interpreter', () => {
 
     }
   })
+
+  test('test eval of if expression', () => {
+    const tests = [
+      {
+        input: "if (true) { 10 }",
+        output: "10"
+      },
+      {
+        input: "if (false) { 10 }",
+        output: "null"
+      },
+      {
+        input: "if (1) { 10 }",
+        output: "10"
+      },
+      {
+        input: "if (1 < 2) { 10 }",
+        output: "10"
+      },
+      {
+        input: "if (1 > 2) { 10 }",
+        output: "null"
+      },
+      {
+        input: "if (1 > 2) { 10 } else { 20 }",
+        output: "20"
+      },
+      {
+        input: "if (1 < 2) { 10 } else { 20 }",
+        output: "10"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
 })
 

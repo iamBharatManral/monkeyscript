@@ -83,7 +83,7 @@ export class InfixExpression extends Expression {
 }
 
 export class IfExpression extends Expression {
-  constructor(public condition: Expression, private consequence: Optional<BlockStatement>, private alternative: Optional<BlockStatement>) { super() }
+  constructor(public condition: Expression, public consequence: Optional<BlockStatement>, public alternative: Optional<BlockStatement>) { super() }
   toString(): string {
     return `if ( ${this.condition.toString()} ) { ${this.consequence?.toString()} } else { ${this.alternative?.toString()} }`
   }

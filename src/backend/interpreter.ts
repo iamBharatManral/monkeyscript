@@ -1,4 +1,5 @@
-import { BooleanLiternal, Expression, ExpressionStatement, InfixExpression, IntegerLiteral, Node, PrefixExpression, Program, Statement } from '../frontend/ast'
+import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, IfExpression, InfixExpression, IntegerLiteral, Node, PrefixExpression, Program, Statement } from '../frontend/ast'
+import { Optional } from '../types'
 import { Integer, Null, Object, Boolean, ObjectType } from './object'
 
 const TRUE = new Boolean(true)
@@ -22,6 +23,10 @@ export default class Interpreter {
         return this.evalPrefixExpresion(ast.operator, this.eval(ast.right))
       case ast instanceof InfixExpression:
         return this.evalInfixExpression(ast.operator, this.eval(ast.left), this.eval(ast.right))
+      case ast instanceof BlockStatement:
+        return this.evalStatements(ast.statements)
+      case ast instanceof IfExpression:
+        return this.evalIfExpression(this.eval(ast.condition), ast.consequence as BlockStatement, ast.alternative)
       default:
         return NULL;
     }
@@ -47,6 +52,28 @@ export default class Interpreter {
         return this.evalMinusPrefixOperatorExpression(exp)
       default:
         return NULL
+    }
+  }
+
+  evalIfExpression(cond: Object, conseq: Node, alter: Optional<Node>): Object {
+    if (this.isTruthy(cond)) {
+      return this.eval(conseq)
+    } else if (alter !== null) {
+      return this.eval(alter)
+    }
+    return NULL
+  }
+
+  isTruthy(obj: Object): boolean {
+    switch (obj) {
+      case NULL:
+        return false
+      case TRUE:
+        return true
+      case FALSE:
+        return false
+      default:
+        return true
     }
   }
 
