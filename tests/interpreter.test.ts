@@ -112,6 +112,42 @@ describe('testing interpreter', () => {
         input: "(5 + 10 * 2 + 15 / 3) * 2 + -10",
         output: "50"
       },
+      {
+        input: "1 < 2",
+        output: "true"
+      },
+      {
+        input: "1 > 2",
+        output: "false"
+      },
+      {
+        input: "1 == 1",
+        output: "true"
+      },
+      {
+        input: "1 != 3",
+        output: "true"
+      },
+      {
+        input: "1 <= 1",
+        output: "true"
+      },
+      {
+        input: "1 >= 3",
+        output: "false"
+      },
+      {
+        input: "true == true",
+        output: "true"
+      },
+      {
+        input: "(1 >= 3)",
+        output: "false"
+      },
+      {
+        input: "(1 < 2) == true",
+        output: "true"
+      },
     ]
     for (const input of tests) {
       const lexer = new Lexer(input.input)

@@ -73,6 +73,10 @@ export default class Interpreter {
     switch (true) {
       case left.type() === ObjectType.INTEGER_OBJ || right.type() === ObjectType.INTEGER_OBJ:
         return this.evalIntegerInfixExpression(op, left, right)
+      case op === "==":
+        return this.nativeBoolToBooleanObject(left == right)
+      case op === "!=":
+        return this.nativeBoolToBooleanObject(left != right)
       default:
         return NULL
     }
@@ -92,6 +96,18 @@ export default class Interpreter {
         return new Integer(leftValue / rightValue)
       case "%":
         return new Integer(leftValue % rightValue)
+      case "<":
+        return this.nativeBoolToBooleanObject(leftValue < rightValue)
+      case "<=":
+        return this.nativeBoolToBooleanObject(leftValue <= rightValue)
+      case ">":
+        return this.nativeBoolToBooleanObject(leftValue > rightValue)
+      case ">=":
+        return this.nativeBoolToBooleanObject(leftValue >= rightValue)
+      case "==":
+        return this.nativeBoolToBooleanObject(leftValue == rightValue)
+      case "!=":
+        return this.nativeBoolToBooleanObject(leftValue != rightValue)
       default:
         return NULL
     }
