@@ -23,5 +23,47 @@ describe('testing interpreter', () => {
     const result = interpreter.eval(pg)
     assert.deepStrictEqual(result.inspect(), "true")
   })
+
+  test('test eval of prefix expression', () => {
+    const tests = [
+      {
+        input: "!true",
+        output: "false"
+      },
+      {
+        input: "!false",
+        output: "true"
+      },
+      {
+        input: "!5",
+        output: "false"
+      },
+      {
+        input: "!!true",
+        output: "true"
+      },
+      {
+        input: "!!false",
+        output: "false"
+      },
+      {
+        input: "!!5",
+        output: "true"
+      },
+      {
+        input: "-5",
+        output: "-5"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
 })
 

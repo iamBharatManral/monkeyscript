@@ -10,13 +10,13 @@ export interface Object {
 }
 
 export class Integer implements Object {
-  constructor(private value: number) { }
+  constructor(public value: number) { }
   type(): ObjectType { return ObjectType.INTEGER_OBJ }
   inspect(): string { return `${this.value}` }
 }
 
 export class Boolean implements Object {
-  constructor(private value: boolean) { }
+  constructor(public value: boolean) { }
   type(): ObjectType { return ObjectType.BOOLEAN_OBJ }
   inspect(): string { return `${this.value}` }
 }
