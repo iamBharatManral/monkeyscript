@@ -20,6 +20,8 @@ export default class Interpreter {
         return this.nativeBoolToBooleanObject(ast.value)
       case ast instanceof PrefixExpression:
         return this.evalPrefixExpresion(ast.operator, this.eval(ast.right))
+      case ast instanceof InfixExpression:
+        return this.evalInfixExpression(ast.operator, this.eval(ast.left), this.eval(ast.right))
       default:
         return NULL;
     }
@@ -65,5 +67,33 @@ export default class Interpreter {
       return NULL
     }
     return new Integer((exp as Integer).value * -1)
+  }
+
+  evalInfixExpression(op: string, left: Object, right: Object): Object {
+    switch (true) {
+      case left.type() === ObjectType.INTEGER_OBJ || right.type() === ObjectType.INTEGER_OBJ:
+        return this.evalIntegerInfixExpression(op, left, right)
+      default:
+        return NULL
+    }
+  }
+
+  evalIntegerInfixExpression(op: string, left: Object, right: Object) {
+    const leftValue = (left as Integer).value
+    const rightValue = (right as Integer).value
+    switch (op) {
+      case "+":
+        return new Integer(leftValue + rightValue)
+      case "-":
+        return new Integer(leftValue - rightValue)
+      case "*":
+        return new Integer(leftValue * rightValue)
+      case "/":
+        return new Integer(leftValue / rightValue)
+      case "%":
+        return new Integer(leftValue % rightValue)
+      default:
+        return NULL
+    }
   }
 }
