@@ -1,6 +1,6 @@
 import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, IfExpression, InfixExpression, IntegerLiteral, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
 import { Optional } from '../types'
-import { Integer, Null, Object, Boolean, ObjectType, Return } from './object'
+import { Integer, Null, Object, Boolean, ObjectType, Return, Error } from './object'
 
 const TRUE = new Boolean(true)
 const FALSE = new Boolean(false)
@@ -38,7 +38,7 @@ export default class Interpreter {
     let result = NULL;
     for (const stmt of block.statements) {
       result = this.eval(stmt)
-      if (result.type() === ObjectType.RETURN_OBJ) {
+      if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
         return result
       }
     }
@@ -53,7 +53,7 @@ export default class Interpreter {
     let result: Object = new Null();
     for (const stmt of stmts) {
       result = this.eval(stmt)
-      if (result.type() === ObjectType.RETURN_OBJ) {
+      if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
         return result;
       }
     }
@@ -67,7 +67,7 @@ export default class Interpreter {
       case "-":
         return this.evalMinusPrefixOperatorExpression(exp)
       default:
-        return NULL
+        return new Error(`unknown operator: ${op}`)
     }
   }
 
@@ -107,7 +107,7 @@ export default class Interpreter {
   }
   evalMinusPrefixOperatorExpression(exp: Object): Object {
     if (exp.type() !== ObjectType.INTEGER_OBJ) {
-      return NULL
+      return new Error(`unknown operator: ${exp.type().toString()}`)
     }
     return new Integer((exp as Integer).value * -1)
   }
@@ -121,7 +121,7 @@ export default class Interpreter {
       case op === "!=":
         return this.nativeBoolToBooleanObject(left != right)
       default:
-        return NULL
+        return new Error(`unkown operator: ${left.type()} ${op} ${right.type()}`)
     }
   }
 
@@ -152,7 +152,7 @@ export default class Interpreter {
       case "!=":
         return this.nativeBoolToBooleanObject(leftValue != rightValue)
       default:
-        return NULL
+        return new Error(`unkown operator: ${left.type()} ${op} ${right.type()}`)
     }
   }
 }

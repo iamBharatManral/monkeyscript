@@ -2,7 +2,8 @@ export enum ObjectType {
   INTEGER_OBJ = "INTEGER",
   BOOLEAN_OBJ = "BOOLEAN",
   RETURN_OBJ = "RETURN_VALUE",
-  NULL_OBJ = "NULL"
+  NULL_OBJ = "NULL",
+  ERROR_OBJ = "ERROR_MESSAGE"
 }
 
 export interface Object {
@@ -33,3 +34,8 @@ export class Return implements Object {
   inspect(): string { return this.value.inspect() }
 }
 
+export class Error implements Object {
+  constructor(public message: string) { }
+  type(): ObjectType { return ObjectType.ERROR_OBJ }
+  inspect(): string { return this.message }
+}
