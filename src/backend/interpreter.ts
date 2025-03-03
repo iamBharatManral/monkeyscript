@@ -1,5 +1,5 @@
-import { Expression, ExpressionStatement, IntegerLiteral, Node, Program, Statement } from '../frontend/ast'
-import { Integer, Null, Object } from './object'
+import { BooleanLiternal, Expression, ExpressionStatement, IntegerLiteral, Node, Program, Statement } from '../frontend/ast'
+import { Integer, Null, Object, Boolean } from './object'
 
 export default class Interpreter {
   constructor() { }
@@ -12,6 +12,8 @@ export default class Interpreter {
         return this.eval((ast as ExpressionStatement).expression as Expression);
       case ast instanceof IntegerLiteral:
         return new Integer((ast as IntegerLiteral).value);
+      case ast instanceof BooleanLiternal:
+        return new Boolean((ast as BooleanLiternal).value);
       default:
         return new Null();
     }

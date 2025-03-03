@@ -16,7 +16,7 @@ export class Integer implements Object {
 }
 
 export class Boolean implements Object {
-  constructor(private value: number) { }
+  constructor(private value: boolean) { }
   type(): ObjectType { return ObjectType.BOOLEAN_OBJ }
   inspect(): string { return `${this.value}` }
 }
