@@ -72,6 +72,8 @@ export default class Interpreter {
     switch (true) {
       case left.type() === ObjectType.INTEGER_OBJ || right.type() === ObjectType.INTEGER_OBJ:
         return this.evalIntegerInfixExpression(op, left, right)
+      case left.type() === ObjectType.STRING_OBJ || right.type() === ObjectType.STRING_OBJ:
+        return this.evalStringInfixExpression(op, left, right)
       case op === "==":
         return this.nativeBoolToBooleanObject(left == right)
       case op === "!=":
@@ -216,6 +218,17 @@ export default class Interpreter {
         return this.nativeBoolToBooleanObject(leftValue == rightValue)
       case "!=":
         return this.nativeBoolToBooleanObject(leftValue != rightValue)
+      default:
+        return unknowOpError(op, left, right)
+    }
+  }
+
+  evalStringInfixExpression(op: string, left: MObject, right: MObject): MObject {
+    const leftValue = (left as StringO).value
+    const rightValue = (right as StringO).value
+    switch (op) {
+      case "+":
+        return new StringO(leftValue + rightValue)
       default:
         return unknowOpError(op, left, right)
     }

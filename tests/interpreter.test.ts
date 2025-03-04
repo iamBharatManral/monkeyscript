@@ -323,5 +323,16 @@ describe('testing interpreter', () => {
     const result = interpreter.eval(pg, env)
     assert.deepStrictEqual(result.inspect(), "hellooo")
   })
+
+  test('eval of string concatenation', () => {
+    const input = `"hellooo" + " world";`
+    const lexer = new Lexer(input)
+    const parser = new Parser(lexer)
+    const pg = parser.parse()
+    const env = new Environment(null)
+    const interpreter = new Interpreter()
+    const result = interpreter.eval(pg, env)
+    assert.deepStrictEqual(result.inspect(), "hellooo world")
+  })
 })
 
