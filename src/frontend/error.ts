@@ -1,3 +1,4 @@
+import { MObject, ErrorO } from "../backend/object";
 import { Token, TokenType } from "./token";
 
 export function syntaxError(expected: TokenType | string, got: Token): string {
@@ -32,4 +33,8 @@ export function expectExpressionError(got: Token): string {
 
 export function expectIdentifierError(got: Token): string {
   return syntaxError(TokenType.IDENT, got)
+}
+
+export function unknowOpError(op: string, left: MObject, right: MObject): MObject {
+  return new ErrorO(`unknown operator: ${left.type()} ${op} ${right.type()}`)
 }

@@ -1,24 +1,24 @@
 import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
 import { Optional } from '../types'
 import Environment from './environment'
-import { Integer, Null, Object, Boolean, ObjectType, Return, Error, Function } from './object'
+import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO } from './object'
 
-const TRUE = new Boolean(true)
-const FALSE = new Boolean(false)
-const NULL = new Null()
-const IDENTIFIER_NOT_FOUND = (id: string) => new Error(`identifier not found: ${id}`)
+const TRUE = new BooleanO(true)
+const FALSE = new BooleanO(false)
+const NULL = new NullO()
+const IDENTIFIER_NOT_FOUND = (id: string) => new ErrorO(`identifier not found: ${id}`)
 
 export default class Interpreter {
   constructor() { }
 
-  eval(ast: Node, env: Environment): Object {
+  eval(ast: Node, env: Environment): MObject {
     switch (true) {
       case ast instanceof Program:
         return this.evalProgram((ast as Program).statements, env);
       case ast instanceof ExpressionStatement:
         return this.eval((ast as ExpressionStatement).expression as Expression, env);
       case ast instanceof IntegerLiteral:
-        return new Integer((ast as IntegerLiteral).value);
+        return new IntegerO((ast as IntegerLiteral).value);
       case ast instanceof BooleanLiternal:
         return this.nativeBoolToBooleanObject(ast.value)
       case ast instanceof PrefixExpression:
@@ -30,7 +30,7 @@ export default class Interpreter {
       case ast instanceof IfExpression:
         return this.evalIfExpression(this.eval(ast.condition, env), ast.consequence as BlockStatement, ast.alternative, env)
       case ast instanceof ReturnStatment:
-        return new Return(this.eval(ast.value as Expression, env))
+        return new ReturnO(this.eval(ast.value as Expression, env))
       case ast instanceof LetStatement:
         return this.evalLetStatement(ast, env)
       case ast instanceof Identifier:
@@ -44,40 +44,40 @@ export default class Interpreter {
     }
   }
 
-  isError(obj: Object): boolean {
+  isError(obj: MObject): boolean {
     return obj.type() === ObjectType.ERROR_OBJ
   }
 
-  evalCallExpression(ast: CallExpression, env: Environment): Object {
+  evalCallExpression(ast: CallExpression, env: Environment): MObject {
     const func = this.eval(ast.fn, env)
     if (this.isError(func)) {
       return func
     }
     const args = this.evalExpressions(ast.args, env)
-    return args.some(arg => this.isError(arg)) ? (args.find(arg => this.isError(arg)) as Object) : this.applyFunction(func as Function, args)
+    return args.some(arg => this.isError(arg)) ? (args.find(arg => this.isError(arg)) as MObject) : this.applyFunction(func as FunctionO, args)
 
   }
 
-  applyFunction(func: Function, args: Array<Object>): Object {
+  applyFunction(func: FunctionO, args: Array<MObject>): MObject {
     if (func.type() !== ObjectType.FUNCTION_OBJ) {
-      return new Error(`not a function ${func.type()}`)
+      return new ErrorO(`not a function ${func.type()}`)
     }
     if (func.parameters.length !== args.length) {
-      return new Error(`args mismatch: expected: ${func.parameters.length}, got: ${args.length}`)
+      return new ErrorO(`args mismatch: expected: ${func.parameters.length}, got: ${args.length}`)
     }
-    const extendedFuncEnv = this.extendFunctionEnv(func as Function, args)
-    const val = this.eval((func as Function).body as BlockStatement, extendedFuncEnv)
+    const extendedFuncEnv = this.extendFunctionEnv(func as FunctionO, args)
+    const val = this.eval((func as FunctionO).body as BlockStatement, extendedFuncEnv)
     return this.unwrapReturnValue(val)
   }
 
-  unwrapReturnValue(val: Object): Object {
+  unwrapReturnValue(val: MObject): MObject {
     if (val.type() === ObjectType.RETURN_OBJ) {
-      return (val as Return).value
+      return (val as ReturnO).value
     }
     return val
   }
 
-  extendFunctionEnv(fn: Function, args: Array<Object>): Environment {
+  extendFunctionEnv(fn: FunctionO, args: Array<MObject>): Environment {
     const newEnv = new Environment(fn.env)
     for (const idx in fn.parameters) {
       newEnv.set(fn.parameters[idx].value, args[idx])
@@ -85,7 +85,7 @@ export default class Interpreter {
     return newEnv
   }
 
-  evalExpressions(exps: Array<Expression>, env: Environment): Array<Object> {
+  evalExpressions(exps: Array<Expression>, env: Environment): Array<MObject> {
     const result = []
     for (const exp of exps) {
       const expVal = this.eval(exp, env)
@@ -97,11 +97,11 @@ export default class Interpreter {
     return result
   }
 
-  evalFunctionLiteral(ast: FunctionLiteral, env: Environment): Object {
-    return new Function(ast.parameters, ast.body, env)
+  evalFunctionLiteral(ast: FunctionLiteral, env: Environment): MObject {
+    return new FunctionO(ast.parameters, ast.body, env)
   }
 
-  evalLetStatement(ast: LetStatement, env: Environment): Object {
+  evalLetStatement(ast: LetStatement, env: Environment): MObject {
     const val = this.eval(ast.value as Expression, env)
     if (this.isError(val)) {
       return val
@@ -110,7 +110,7 @@ export default class Interpreter {
     return NULL
   }
 
-  evalIdentifier(ast: Identifier, env: Environment): Object {
+  evalIdentifier(ast: Identifier, env: Environment): MObject {
     const idVal = env.get(ast.value)
     if (!idVal) {
       return IDENTIFIER_NOT_FOUND(ast.value)
@@ -118,7 +118,7 @@ export default class Interpreter {
     return idVal
   }
 
-  evalBlockStatements(block: BlockStatement, env: Environment): Object {
+  evalBlockStatements(block: BlockStatement, env: Environment): MObject {
     let result = NULL;
     for (const stmt of block.statements) {
       result = this.eval(stmt, env)
@@ -133,8 +133,8 @@ export default class Interpreter {
     return val ? TRUE : FALSE
   }
 
-  evalProgram(stmts: Array<Statement>, env: Environment): Object {
-    let result: Object = new Null();
+  evalProgram(stmts: Array<Statement>, env: Environment): MObject {
+    let result: MObject = new NullO();
     for (const stmt of stmts) {
       result = this.eval(stmt, env)
       if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
@@ -144,18 +144,18 @@ export default class Interpreter {
     return result;
   }
 
-  evalPrefixExpresion(op: string, exp: Object): Object {
+  evalPrefixExpresion(op: string, exp: MObject): MObject {
     switch (op) {
       case "!":
         return this.evalBangOperatorExpression(exp)
       case "-":
         return this.evalMinusPrefixOperatorExpression(exp)
       default:
-        return new Error(`unknown operator: ${op}`)
+        return new ErrorO(`unknown operator: ${op}`)
     }
   }
 
-  evalIfExpression(cond: Object, conseq: Node, alter: Optional<Node>, env: Environment): Object {
+  evalIfExpression(cond: MObject, conseq: Node, alter: Optional<Node>, env: Environment): MObject {
     if (this.isTruthy(cond)) {
       return this.eval(conseq, env)
     } else if (alter !== null) {
@@ -164,7 +164,7 @@ export default class Interpreter {
     return NULL
   }
 
-  isTruthy(obj: Object): boolean {
+  isTruthy(obj: MObject): boolean {
     switch (obj) {
       case NULL:
         return false
@@ -177,7 +177,7 @@ export default class Interpreter {
     }
   }
 
-  evalBangOperatorExpression(exp: Object): Object {
+  evalBangOperatorExpression(exp: MObject): MObject {
     switch (exp) {
       case TRUE:
         return FALSE
@@ -189,14 +189,14 @@ export default class Interpreter {
         return FALSE
     }
   }
-  evalMinusPrefixOperatorExpression(exp: Object): Object {
+  evalMinusPrefixOperatorExpression(exp: MObject): MObject {
     if (exp.type() !== ObjectType.INTEGER_OBJ) {
-      return new Error(`unknown operator: ${exp.type().toString()}`)
+      return new ErrorO(`unknown operator: ${exp.type().toString()}`)
     }
-    return new Integer((exp as Integer).value * -1)
+    return new IntegerO((exp as IntegerO).value * -1)
   }
 
-  evalInfixExpression(op: string, left: Object, right: Object): Object {
+  evalInfixExpression(op: string, left: MObject, right: MObject): MObject {
     switch (true) {
       case left.type() === ObjectType.INTEGER_OBJ || right.type() === ObjectType.INTEGER_OBJ:
         return this.evalIntegerInfixExpression(op, left, right)
@@ -205,24 +205,24 @@ export default class Interpreter {
       case op === "!=":
         return this.nativeBoolToBooleanObject(left != right)
       default:
-        return new Error(`unkown operator: ${left.type()} ${op} ${right.type()}`)
+        return new ErrorO(`unkown operator: ${left.type()} ${op} ${right.type()}`)
     }
   }
 
-  evalIntegerInfixExpression(op: string, left: Object, right: Object) {
-    const leftValue = (left as Integer).value
-    const rightValue = (right as Integer).value
+  evalIntegerInfixExpression(op: string, left: MObject, right: MObject) {
+    const leftValue = (left as IntegerO).value
+    const rightValue = (right as IntegerO).value
     switch (op) {
       case "+":
-        return new Integer(leftValue + rightValue)
+        return new IntegerO(leftValue + rightValue)
       case "-":
-        return new Integer(leftValue - rightValue)
+        return new IntegerO(leftValue - rightValue)
       case "*":
-        return new Integer(leftValue * rightValue)
+        return new IntegerO(leftValue * rightValue)
       case "/":
-        return new Integer(leftValue / rightValue)
+        return new IntegerO(leftValue / rightValue)
       case "%":
-        return new Integer(leftValue % rightValue)
+        return new IntegerO(leftValue % rightValue)
       case "<":
         return this.nativeBoolToBooleanObject(leftValue < rightValue)
       case "<=":
@@ -236,7 +236,7 @@ export default class Interpreter {
       case "!=":
         return this.nativeBoolToBooleanObject(leftValue != rightValue)
       default:
-        return new Error(`unkown operator: ${left.type()} ${op} ${right.type()}`)
+        return new ErrorO(`unknown operator: ${left.type()} ${op} ${right.type()}`)
     }
   }
 }

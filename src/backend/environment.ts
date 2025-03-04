@@ -1,10 +1,10 @@
 import { Optional } from '../types'
-import { Object, Error } from './object'
+import { MObject, ErrorO } from './object'
 
 export default class Environment {
   constructor(public outer: Optional<Environment>) { }
-  store: Map<string, Object> = new Map()
-  get(name: string): Object {
+  store: Map<string, MObject> = new Map()
+  get(name: string): MObject {
     let val = this.store.get(name)
     let outer = this.outer;
     while (!val && outer) {
@@ -12,11 +12,11 @@ export default class Environment {
       outer = outer.outer;
     }
     if (!val) {
-      return new Error(`identifier not found: ${name}`)
+      return new ErrorO(`identifier not found: ${name}`)
     }
     return val;
   }
-  set(name: string, value: Object): Object {
+  set(name: string, value: MObject): MObject {
     this.store.set(name, value)
     return value
   }
