@@ -18,30 +18,30 @@ export class Program implements Node {
 
 // Statements
 export class LetStatement implements Statement {
-  constructor(public name: Identifier, public value: Optional<Expression>) { }
+  constructor(public name: Identifier, public value: Expression) { }
   toString(): string {
-    return `let ${this.name} = ${this.value?.toString()}`
+    return `let ${this.name} = ${this.value.toString()}`
   }
 }
 
 export class ReturnStatment implements Statement {
-  constructor(public value: Optional<Expression>) { }
+  constructor(public value: Expression) { }
   toString(): string {
-    return `return ${this.value?.toString()}`
+    return `return ${this.value.toString()}`
   }
 }
 
 export class ExpressionStatement implements Statement {
-  constructor(public expression: Optional<Expression>) { }
+  constructor(public expression: Expression) { }
   toString(): string {
-    return `${this.expression?.toString()}`
+    return `${this.expression.toString()}`
   }
 }
 
 export class BlockStatement implements Statement {
   constructor(public statements: Array<Statement>) { }
   toString(): string {
-    return `${this.statements?.toString()}`
+    return `${this.statements.toString()}`
   }
 }
 
@@ -83,14 +83,14 @@ export class InfixExpression extends Expression {
 }
 
 export class IfExpression extends Expression {
-  constructor(public condition: Expression, public consequence: Optional<BlockStatement>, public alternative: Optional<BlockStatement>) { super() }
+  constructor(public condition: Expression, public consequence: BlockStatement, public alternative: Optional<BlockStatement>) { super() }
   toString(): string {
     return `if ( ${this.condition.toString()} ) { ${this.consequence?.toString()} } else { ${this.alternative?.toString()} }`
   }
 }
 
 export class FunctionLiteral extends Expression {
-  constructor(public parameters: Array<Identifier>, public body: Optional<BlockStatement>) { super() }
+  constructor(public parameters: Array<Identifier>, public body: BlockStatement) { super() }
   toString(): string {
     return `fn ( ${this.parameters.toString()} ) { ${this.body?.toString()} }`
   }

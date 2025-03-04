@@ -1,6 +1,6 @@
 import { Optional } from "../types";
 import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement } from "./ast";
-import { expectAssignOpError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightParenError, syntaxError } from "./error";
+import { expectAssignOpError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightParenError } from "./error";
 import Lexer from "./lexer";
 import { Precedence, PrecedenceTable, Token, TokenType } from "./token";
 
@@ -80,6 +80,11 @@ export default class Parser {
 
     const expr = this.parseExpression(Precedence.LOWEST)
 
+    if (!expr) {
+      this.errors.push(expectExpressionError(this.curToken))
+      return null
+    }
+
     // end the parsing of stmt at semicolon if present
     if (this.peekTokenIs(TokenType.SEMICOLON)) {
       this.nextToken()
@@ -109,7 +114,13 @@ export default class Parser {
   }
 
   private parseExpressionStatement(): Optional<Expression> {
+    const token = this.curToken;
     const expr = this.parseExpression(Precedence.LOWEST);
+
+    if (!expr) {
+      this.errors.push(expectExpressionError(token))
+      return null
+    }
 
     // end the parsing of stmt at semicolon if present
     if (this.peekTokenIs(TokenType.SEMICOLON)) {
@@ -281,7 +292,7 @@ export default class Parser {
 
   }
 
-  private parseBlockStatement(): Optional<BlockStatement> {
+  private parseBlockStatement(): BlockStatement {
     const stmts: Array<Statement> = [];
     this.nextToken()
     while (!this.curTokenIs(TokenType.RBRACE) && !this.curTokenIs(TokenType.EOF)) {

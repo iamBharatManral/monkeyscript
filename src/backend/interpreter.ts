@@ -1,4 +1,4 @@
-import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
+import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment } from '../frontend/ast'
 import { identifierNotFoundError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
 import Environment from './environment'
@@ -14,9 +14,9 @@ export default class Interpreter {
   eval(ast: Node, env: Environment): MObject {
     switch (true) {
       case ast instanceof Program:
-        return this.evalProgram((ast as Program).statements, env);
+        return this.evalProgram(ast, env);
       case ast instanceof ExpressionStatement:
-        return this.eval((ast as ExpressionStatement).expression as Expression, env);
+        return this.eval(ast.expression, env);
       case ast instanceof IntegerLiteral:
         return new IntegerO((ast as IntegerLiteral).value);
       case ast instanceof BooleanLiternal:
@@ -44,9 +44,9 @@ export default class Interpreter {
     }
   }
 
-  evalProgram(stmts: Array<Statement>, env: Environment): MObject {
+  evalProgram(pg: Program, env: Environment): MObject {
     let result: MObject = new NullO();
-    for (const stmt of stmts) {
+    for (const stmt of pg.statements) {
       result = this.eval(stmt, env)
       if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
         return result;
