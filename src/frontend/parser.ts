@@ -153,7 +153,6 @@ export default class Parser {
     return left
   }
 
-
   private parseInfixExpression(left: Optional<Expression>): Optional<Expression> {
     const token = this.curToken;
     const infixPrec = this.curPrecedence();
@@ -187,6 +186,7 @@ export default class Parser {
       this.errors.push(expectExpressionError(this.curToken))
       return args
     }
+
     args.push(exp)
 
     while (this.peekTokenIs(TokenType.COMMA)) {

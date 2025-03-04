@@ -1,4 +1,4 @@
-import { MObject, ErrorO } from "../backend/object";
+import { MObject, ErrorO, ObjectType } from "../backend/object";
 import { Optional } from "../types";
 import { Token, TokenType } from "./token";
 
@@ -45,4 +45,12 @@ export function unknowOpError(op: string, left: Optional<MObject> = null, right:
 
 export function identifierNotFoundError(id: MObject | string): MObject {
   return new ErrorO(`identifier not found: '${id}'`)
+}
+
+export function argumentMismatchError(expected: number, got: number): MObject {
+  return new ErrorO(`arguments mismatch, expected: ${expected}, got: ${got}`)
+}
+
+export function argumentNotSupportedError(fnName: string, expected: ObjectType, got: ObjectType): MObject {
+  return new ErrorO(`argument to '${fnName}' not supported, expected: ${expected}, got: ${got}`)
 }

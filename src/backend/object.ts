@@ -2,6 +2,8 @@ import { BlockStatement, Identifier } from "../frontend/ast"
 import { Optional } from "../types"
 import Environment from "./environment"
 
+type BuiltinFunc = (...args: Array<MObject>) => MObject
+
 export enum ObjectType {
   INTEGER_OBJ = "INTEGER",
   BOOLEAN_OBJ = "BOOLEAN",
@@ -9,7 +11,8 @@ export enum ObjectType {
   FUNCTION_OBJ = "FUNCTION",
   STRING_OBJ = "STRING",
   NULL_OBJ = "NULL",
-  ERROR_OBJ = "ERROR_MESSAGE"
+  ERROR_OBJ = "ERROR_MESSAGE",
+  BUILTIN_FN = "BUILTIN"
 }
 
 export interface MObject {
@@ -56,4 +59,10 @@ export class FunctionO implements MObject {
   constructor(public parameters: Array<Identifier>, public body: Optional<BlockStatement>, public env: Environment) { }
   type(): ObjectType { return ObjectType.FUNCTION_OBJ }
   inspect(): string { return ObjectType.FUNCTION_OBJ }
+}
+
+export class BuiltinFunctionO implements MObject {
+  constructor(public fn: BuiltinFunc) { }
+  type(): ObjectType { return ObjectType.BUILTIN_FN }
+  inspect(): string { return `builtin function` }
 }

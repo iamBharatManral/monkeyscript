@@ -334,5 +334,40 @@ describe('testing interpreter', () => {
     const result = interpreter.eval(pg, env)
     assert.deepStrictEqual(result.inspect(), "hellooo world")
   })
+
+  test('eval of builtin functions', () => {
+    const tests = [
+      {
+        input: `len("")`,
+        output: "0"
+      },
+      {
+        input: `len("four")`,
+        output: "4"
+      },
+      {
+        input: `len("hello world")`,
+        output: "11"
+      },
+      {
+        input: `len(1)`,
+        output: "argument to 'len' not supported, expected: STRING, got: INTEGER"
+      },
+      {
+        input: `len("one","two")`,
+        output: "arguments mismatch, expected: 1, got: 2"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const env = new Environment(null)
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg, env)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
 })
 

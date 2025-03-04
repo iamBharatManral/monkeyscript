@@ -118,9 +118,6 @@ export default class Lexer {
       return new Token(TokenType.ILLEGAL, "unterminated string")
     }
 
-    // consume ending "
-    this.readChar()
-
     return new Token(TokenType.STRING, str)
   }
 

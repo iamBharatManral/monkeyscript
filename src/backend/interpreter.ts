@@ -1,8 +1,9 @@
 import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, StringLiteral } from '../frontend/ast'
-import { identifierNotFoundError, unknowOpError } from '../frontend/error'
+import { argumentMismatchError, identifierNotFoundError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
+import { builtins } from './builtins'
 import Environment from './environment'
-import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO } from './object'
+import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO } from './object'
 
 const TRUE = new BooleanO(true)
 const FALSE = new BooleanO(false)
@@ -114,10 +115,12 @@ export default class Interpreter {
 
   evalIdentifier(ast: Identifier, env: Environment): MObject {
     const idVal = env.get(ast.value)
-    if (!idVal) {
-      return identifierNotFoundError(idVal)
+    if (idVal) return idVal;
+    const builtinFunc = builtins[ast.value];
+    if (!builtinFunc) {
+      return identifierNotFoundError(ast.value)
     }
-    return idVal
+    return builtinFunc
   }
 
   evalFunctionLiteral(ast: FunctionLiteral, env: Environment): MObject {
@@ -134,16 +137,20 @@ export default class Interpreter {
 
   }
 
-  applyFunction(func: FunctionO, args: Array<MObject>): MObject {
-    if (func.type() !== ObjectType.FUNCTION_OBJ) {
-      return new ErrorO(`not a function ${func.type()}`)
+  applyFunction(func: MObject, args: Array<MObject>): MObject {
+    switch (func.type()) {
+      case ObjectType.FUNCTION_OBJ:
+        if ((func as FunctionO).parameters.length !== args.length) {
+          return argumentMismatchError((func as FunctionO).parameters.length, args.length)
+        }
+        const extendedFuncEnv = this.extendFunctionEnv(func as FunctionO, args)
+        const val = this.eval((func as FunctionO).body as BlockStatement, extendedFuncEnv)
+        return this.unwrapReturnValue(val)
+      case ObjectType.BUILTIN_FN:
+        return (func as BuiltinFunctionO).fn(...args)
+      default:
+        return new ErrorO(`not a function ${func.type()}`)
     }
-    if (func.parameters.length !== args.length) {
-      return new ErrorO(`args mismatch: expected: ${func.parameters.length}, got: ${args.length}`)
-    }
-    const extendedFuncEnv = this.extendFunctionEnv(func as FunctionO, args)
-    const val = this.eval((func as FunctionO).body as BlockStatement, extendedFuncEnv)
-    return this.unwrapReturnValue(val)
   }
 
   unwrapReturnValue(val: MObject): MObject {
