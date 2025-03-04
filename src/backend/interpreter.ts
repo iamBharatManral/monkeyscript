@@ -54,13 +54,16 @@ export default class Interpreter {
       return func
     }
     const args = this.evalExpressions(ast.args, env)
-    return args.some(arg => this.isError(arg)) ? (args.find(arg => this.isError(arg)) as Object) : this.applyFunction(func, args)
+    return args.some(arg => this.isError(arg)) ? (args.find(arg => this.isError(arg)) as Object) : this.applyFunction(func as Function, args)
 
   }
 
-  applyFunction(func: Object, args: Array<Object>): Object {
+  applyFunction(func: Function, args: Array<Object>): Object {
     if (func.type() !== ObjectType.FUNCTION_OBJ) {
       return new Error(`not a function ${func.type()}`)
+    }
+    if (func.parameters.length !== args.length) {
+      return new Error(`args mismatch: expected: ${func.parameters.length}, got: ${args.length}`)
     }
     const extendedFuncEnv = this.extendFunctionEnv(func as Function, args)
     const val = this.eval((func as Function).body as BlockStatement, extendedFuncEnv)
@@ -104,7 +107,7 @@ export default class Interpreter {
       return val
     }
     env.set(ast.name.value, val)
-    return val
+    return NULL
   }
 
   evalIdentifier(ast: Identifier, env: Environment): Object {
