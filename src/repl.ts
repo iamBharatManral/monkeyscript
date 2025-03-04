@@ -1,5 +1,6 @@
 import readline from 'readline';
 import { run } from './runner';
+import Environment from './backend/environment';
 
 const rl = readline.createInterface(
   process.stdin,
@@ -13,12 +14,12 @@ function askQuestion(query: string): Promise<string> {
 export default async function repl() {
 
   const MAIN_PROMPT = "> ";
-
+  const environment = new Environment()
   while (true) {
     const input = await askQuestion(MAIN_PROMPT)
     if (input === ":q") {
       process.exit(0);
     }
-    run(input)
+    run(environment, input)
   }
 }

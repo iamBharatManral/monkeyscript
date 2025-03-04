@@ -1,43 +1,70 @@
-import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, IfExpression, InfixExpression, IntegerLiteral, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
+import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
 import { Optional } from '../types'
+import Environment from './environment'
 import { Integer, Null, Object, Boolean, ObjectType, Return, Error } from './object'
 
 const TRUE = new Boolean(true)
 const FALSE = new Boolean(false)
 const NULL = new Null()
+const IDENTIFIER_NOT_FOUND = (id: string) => new Error(`identifier not found: ${id}`)
 
 export default class Interpreter {
   constructor() { }
 
-  eval(ast: Node): Object {
+  eval(ast: Node, env: Environment): Object {
     switch (true) {
       case ast instanceof Program:
-        return this.evalProgram((ast as Program).statements);
+        return this.evalProgram((ast as Program).statements, env);
       case ast instanceof ExpressionStatement:
-        return this.eval((ast as ExpressionStatement).expression as Expression);
+        return this.eval((ast as ExpressionStatement).expression as Expression, env);
       case ast instanceof IntegerLiteral:
         return new Integer((ast as IntegerLiteral).value);
       case ast instanceof BooleanLiternal:
         return this.nativeBoolToBooleanObject(ast.value)
       case ast instanceof PrefixExpression:
-        return this.evalPrefixExpresion(ast.operator, this.eval(ast.right))
+        return this.evalPrefixExpresion(ast.operator, this.eval(ast.right, env))
       case ast instanceof InfixExpression:
-        return this.evalInfixExpression(ast.operator, this.eval(ast.left), this.eval(ast.right))
+        return this.evalInfixExpression(ast.operator, this.eval(ast.left, env), this.eval(ast.right, env))
       case ast instanceof BlockStatement:
-        return this.evalBlockStatements(ast)
+        return this.evalBlockStatements(ast, env)
       case ast instanceof IfExpression:
-        return this.evalIfExpression(this.eval(ast.condition), ast.consequence as BlockStatement, ast.alternative)
+        return this.evalIfExpression(this.eval(ast.condition, env), ast.consequence as BlockStatement, ast.alternative, env)
       case ast instanceof ReturnStatment:
-        return new Return(this.eval(ast.value as Expression))
+        return new Return(this.eval(ast.value as Expression, env))
+      case ast instanceof LetStatement:
+        return this.evalLetStatement(ast, env)
+      case ast instanceof Identifier:
+        return this.evalIdentifier(ast, env)
       default:
         return NULL;
     }
   }
 
-  evalBlockStatements(block: BlockStatement): Object {
+  isError(obj: Object): boolean {
+    return obj.type() === ObjectType.ERROR_OBJ
+  }
+
+  evalLetStatement(ast: LetStatement, env: Environment): Object {
+    const val = this.eval(ast.value as Expression, env)
+    if (this.isError(val)) {
+      return val
+    }
+    env.set(ast.name.value, val)
+    return val
+  }
+
+  evalIdentifier(ast: Identifier, env: Environment): Object {
+    const idVal = env.get(ast.value)
+    if (!idVal) {
+      return IDENTIFIER_NOT_FOUND(ast.value)
+    }
+    return idVal
+  }
+
+  evalBlockStatements(block: BlockStatement, env: Environment): Object {
     let result = NULL;
     for (const stmt of block.statements) {
-      result = this.eval(stmt)
+      result = this.eval(stmt, env)
       if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
         return result
       }
@@ -49,10 +76,10 @@ export default class Interpreter {
     return val ? TRUE : FALSE
   }
 
-  evalProgram(stmts: Array<Statement>): Object {
+  evalProgram(stmts: Array<Statement>, env: Environment): Object {
     let result: Object = new Null();
     for (const stmt of stmts) {
-      result = this.eval(stmt)
+      result = this.eval(stmt, env)
       if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
         return result;
       }
@@ -71,11 +98,11 @@ export default class Interpreter {
     }
   }
 
-  evalIfExpression(cond: Object, conseq: Node, alter: Optional<Node>): Object {
+  evalIfExpression(cond: Object, conseq: Node, alter: Optional<Node>, env: Environment): Object {
     if (this.isTruthy(cond)) {
-      return this.eval(conseq)
+      return this.eval(conseq, env)
     } else if (alter !== null) {
-      return this.eval(alter)
+      return this.eval(alter, env)
     }
     return NULL
   }
