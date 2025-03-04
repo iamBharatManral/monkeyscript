@@ -2,7 +2,7 @@
   "name": "monkeyscript",
   "version": "1.0.0",
   "description": "monkey language interpreter",
-  "main": "main.js",
+  "main": "dist/main.js",
   "scripts": {
     "dev": "ts-node src/main.ts",
     "build": "tsc",

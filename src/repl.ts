@@ -1,6 +1,7 @@
 import readline from 'readline';
 import { run } from './runner';
 import Environment from './backend/environment';
+import { header } from './utils';
 
 const rl = readline.createInterface(
   process.stdin,
@@ -12,7 +13,7 @@ function askQuestion(query: string): Promise<string> {
 }
 
 export default async function repl() {
-
+  header();
   const MAIN_PROMPT = "> ";
   const environment = new Environment(null)
   while (true) {

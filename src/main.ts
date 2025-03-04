@@ -1,19 +1,20 @@
 import repl from "./repl"
-import colors from 'colors'
+import execute from "./scripter";
+import { usage } from "./utils";
 
 async function main() {
+
+  // start repl by default
   if (process.argv.length === 2) {
-    header();
     await repl()
   }
-}
 
-function header() {
-  console.log(colors.red("▄▄▄▄   ▄▄▄  ▄▄▄▄  █  ▄ ▗▞▀▚▖▄   ▄  ▄▄▄ ▗▞▀▘ ▄▄▄ ▄ ▄▄▄▄     ■  "))
-  console.log(colors.red("█ █ █ █   █ █   █ █▄▀  ▐▛▀▀▘█   █ ▀▄▄  ▝▚▄▖█    ▄ █   █ ▗▄▟▙▄▖"));
-  console.log(colors.white("█   █ ▀▄▄▄▀ █   █ █ ▀▄ ▝▚▄▄▖ ▀▀▀█ ▄▄▄▀     █    █ █▄▄▄▀   ▐▌  "));
-  console.log(colors.red("                  █  █      ▄   █               █ █       ▐▌  "));
-  console.log(colors.green("                             ▀▀▀                  ▀       ▐▌  "));
+  // execute code from file
+  if (process.argv.length === 3) {
+    execute(process.argv[2])
+  }
+
+  usage()
 }
 
 main()
