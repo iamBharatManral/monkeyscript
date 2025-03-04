@@ -40,6 +40,8 @@ export enum TokenType {
   ELSE = "ELSE",
   RETRUN = "RETURN",
 
+  STRING = "STRING"
+
 }
 
 export const Keywords: { [key: string]: TokenType } = {

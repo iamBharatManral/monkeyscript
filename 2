@@ -2,7 +2,7 @@ import { BlockStatement, BooleanLiternal, CallExpression, Expression, Expression
 import { identifierNotFoundError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
 import Environment from './environment'
-import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO } from './object'
+import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO } from './object'
 
 const TRUE = new BooleanO(true)
 const FALSE = new BooleanO(false)
@@ -40,7 +40,7 @@ export default class Interpreter {
       case ast instanceof CallExpression:
         return this.evalCallExpression(ast, env)
       case ast instanceof StringLiteral:
-        return new StringO(ast.value)
+        return this.evalCallExpression(ast, env)
       default:
         return NULL;
     }

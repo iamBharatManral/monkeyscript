@@ -21,7 +21,7 @@ describe('testing lexer', () => {
     const lexer = new Lexer(input);
     const got = generateTokens(lexer);
 
-    assert.deepStrictEqual(expected, got)
+    assert.deepStrictEqual(got, expected)
 
   })
 
@@ -76,7 +76,7 @@ describe('testing lexer', () => {
     const lexer = new Lexer(input);
     const got = generateTokens(lexer);
 
-    assert.deepStrictEqual(expected, got)
+    assert.deepStrictEqual(got, expected)
 
   })
   test('another set of tokens', () => {
@@ -102,7 +102,7 @@ describe('testing lexer', () => {
     const lexer = new Lexer(input);
     const got = generateTokens(lexer);
 
-    assert.deepStrictEqual(expected, got)
+    assert.deepStrictEqual(got, expected)
   })
 
   test('test if else return token', () => {
@@ -136,7 +136,7 @@ describe('testing lexer', () => {
     const lexer = new Lexer(input);
     const got = generateTokens(lexer);
 
-    assert.deepStrictEqual(expected, got)
+    assert.deepStrictEqual(got, expected)
   })
 
   test('comparison tokens', () => {
@@ -162,12 +162,28 @@ describe('testing lexer', () => {
     const lexer = new Lexer(input);
     const got = generateTokens(lexer);
 
-    assert.deepStrictEqual(expected, got)
+    assert.deepStrictEqual(got, expected)
+
+  })
+
+  test('string literal', () => {
+    const input = `"this is a string"
+                    "this is a second string"
+                   `;
+    const expected: Array<Token> = [
+      new Token(TokenType.STRING, "this is a string"),
+      new Token(TokenType.STRING, "this is a second string"),
+      new Token(TokenType.EOF, ""),
+    ];
+
+    const lexer = new Lexer(input);
+    const got = generateTokens(lexer);
+
+    assert.deepStrictEqual(got, expected)
 
   })
 
 })
-
 
 function generateTokens(lexer: Lexer) {
   const got: Array<Token> = [];

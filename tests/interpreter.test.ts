@@ -312,5 +312,16 @@ describe('testing interpreter', () => {
 
     }
   })
+
+  test('eval of string literal', () => {
+    const input = `"hellooo";`
+    const lexer = new Lexer(input)
+    const parser = new Parser(lexer)
+    const pg = parser.parse()
+    const env = new Environment(null)
+    const interpreter = new Interpreter()
+    const result = interpreter.eval(pg, env)
+    assert.deepStrictEqual(result.inspect(), "hellooo")
+  })
 })
 

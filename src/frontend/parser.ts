@@ -1,5 +1,5 @@
 import { Optional } from "../types";
-import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement } from "./ast";
+import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement, StringLiteral } from "./ast";
 import { expectAssignOpError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightParenError } from "./error";
 import Lexer from "./lexer";
 import { Precedence, PrecedenceTable, Token, TokenType } from "./token";
@@ -25,6 +25,7 @@ export default class Parser {
     this.registerPrefixFunc(TokenType.LPAREN, this.parseGroupedExpression)
     this.registerPrefixFunc(TokenType.MINUS, this.parsePrefixExpression)
     this.registerPrefixFunc(TokenType.BANG, this.parsePrefixExpression)
+    this.registerPrefixFunc(TokenType.STRING, this.parseStringLiteral)
     this.registerPrefixFunc(TokenType.IF, this.parseIfExpression)
     this.registerPrefixFunc(TokenType.FUNCTION, this.parseFunctionLiteral)
     this.registerInfixFunc(TokenType.LPAREN, this.parseCallExpression)
@@ -326,6 +327,10 @@ export default class Parser {
 
   private parseIntegerLiteral(): Expression {
     return new IntegerLiteral(parseInt(this.curToken.literal, 10))
+  }
+
+  private parseStringLiteral(): Expression {
+    return new StringLiteral(this.curToken.literal)
   }
 
   private parseIdentifier(): Expression {

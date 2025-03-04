@@ -7,6 +7,7 @@ export enum ObjectType {
   BOOLEAN_OBJ = "BOOLEAN",
   RETURN_OBJ = "RETURN_VALUE",
   FUNCTION_OBJ = "FUNCTION",
+  STRING_OBJ = "STRING",
   NULL_OBJ = "NULL",
   ERROR_OBJ = "ERROR_MESSAGE"
 }
@@ -26,6 +27,12 @@ export class BooleanO implements MObject {
   constructor(public value: boolean) { }
   type(): ObjectType { return ObjectType.BOOLEAN_OBJ }
   inspect(): string { return `${this.value}` }
+}
+
+export class StringO implements MObject {
+  constructor(public value: string) { }
+  type(): ObjectType { return ObjectType.STRING_OBJ }
+  inspect(): string { return this.value }
 }
 
 export class NullO implements MObject {

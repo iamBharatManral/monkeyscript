@@ -2,7 +2,7 @@ import { Keywords, Token, TokenType } from "./token";
 import { Optional } from '../types';
 
 export default class Lexer {
-  constructor(private source: string, private position: number = 0, private readPosition: number = 0, private char: Optional<string> = "") {
+  constructor(private source: string, private position: number = 0, private readPosition: number = 0, private char: Optional<string> = null) {
     this.readChar();
   }
 
@@ -75,6 +75,9 @@ export default class Lexer {
       case "}":
         token = new Token(TokenType.RBRACE, this.char)
         break
+      case '"':
+        token = this.readString()
+        break
       case null:
         token = new Token(TokenType.EOF, "")
         break
@@ -99,6 +102,28 @@ export default class Lexer {
     return new Token(TokenType.INT, iden)
 
   }
+
+  private readString(): Token {
+    let str = "";
+
+    // consume starting "
+    this.readChar()
+
+    while (!this.isAtEndOfInput() && this.char !== '"') {
+      str += this.char
+      this.readChar()
+    }
+
+    if (this.char !== '"') {
+      return new Token(TokenType.ILLEGAL, "unterminated string")
+    }
+
+    // consume ending "
+    this.readChar()
+
+    return new Token(TokenType.STRING, str)
+  }
+
   private isLetter(char: string) {
     return /^[a-zA-Z_]$/.test(char);
   }
@@ -110,8 +135,12 @@ export default class Lexer {
   }
 
   private peekChar(): Optional<string> {
-    if (this.readPosition >= this.source.length) return null;
+    if (this.isAtEndOfInput()) return null;
     return this.source[this.readPosition];
+  }
+
+  private isAtEndOfInput(): boolean {
+    return this.readPosition >= this.source.length;
   }
 
 
@@ -135,7 +164,7 @@ export default class Lexer {
       : new Token(TokenType.IDENT, iden)
   }
   private readChar() {
-    if (this.readPosition >= this.source.length) {
+    if (this.isAtEndOfInput()) {
       this.char = null;
       return;
     }

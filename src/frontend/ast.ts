@@ -68,6 +68,13 @@ export class IntegerLiteral extends Expression {
   }
 }
 
+export class StringLiteral extends Expression {
+  constructor(public value: string) { super() }
+  toString(): string {
+    return `${this.value}`
+  }
+}
+
 export class PrefixExpression extends Expression {
   constructor(public operator: string, public right: Expression) { super() }
   toString(): string {
