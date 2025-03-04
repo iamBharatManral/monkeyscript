@@ -1,3 +1,4 @@
+import { identifierNotFoundError } from '../frontend/error';
 import { Optional } from '../types'
 import { MObject, ErrorO } from './object'
 
@@ -12,7 +13,7 @@ export default class Environment {
       outer = outer.outer;
     }
     if (!val) {
-      return new ErrorO(`identifier not found: ${name}`)
+      return identifierNotFoundError(name)
     }
     return val;
   }

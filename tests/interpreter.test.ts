@@ -259,7 +259,7 @@ describe('testing interpreter', () => {
       },
       {
         input: "a",
-        output: "identifier not found: a"
+        output: "identifier not found: 'a'"
       },
     ]
     for (const input of tests) {

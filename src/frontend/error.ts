@@ -1,4 +1,5 @@
 import { MObject, ErrorO } from "../backend/object";
+import { Optional } from "../types";
 import { Token, TokenType } from "./token";
 
 export function syntaxError(expected: TokenType | string, got: Token): string {
@@ -35,6 +36,13 @@ export function expectIdentifierError(got: Token): string {
   return syntaxError(TokenType.IDENT, got)
 }
 
-export function unknowOpError(op: string, left: MObject, right: MObject): MObject {
-  return new ErrorO(`unknown operator: ${left.type()} ${op} ${right.type()}`)
+export function unknowOpError(op: string, left: Optional<MObject> = null, right: Optional<MObject> = null): MObject {
+  if (!left && !right) {
+    return new ErrorO(`unknown unary operator: ${op}`)
+  }
+  return new ErrorO(`unknown binary operator: ${left?.type()} ${op} ${right?.type()}`)
+}
+
+export function identifierNotFoundError(id: MObject | string): MObject {
+  return new ErrorO(`identifier not found: '${id}'`)
 }

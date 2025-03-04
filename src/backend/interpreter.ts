@@ -1,4 +1,5 @@
 import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
+import { identifierNotFoundError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
 import Environment from './environment'
 import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO } from './object'
@@ -6,7 +7,6 @@ import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, Functi
 const TRUE = new BooleanO(true)
 const FALSE = new BooleanO(false)
 const NULL = new NullO()
-const IDENTIFIER_NOT_FOUND = (id: string) => new ErrorO(`identifier not found: ${id}`)
 
 export default class Interpreter {
   constructor() { }
@@ -44,8 +44,80 @@ export default class Interpreter {
     }
   }
 
-  isError(obj: MObject): boolean {
-    return obj.type() === ObjectType.ERROR_OBJ
+  evalProgram(stmts: Array<Statement>, env: Environment): MObject {
+    let result: MObject = new NullO();
+    for (const stmt of stmts) {
+      result = this.eval(stmt, env)
+      if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
+        return result;
+      }
+    }
+    return result;
+  }
+
+  evalPrefixExpresion(op: string, exp: MObject): MObject {
+    switch (op) {
+      case "!":
+        return this.evalBangOperatorExpression(exp)
+      case "-":
+        return this.evalMinusPrefixOperatorExpression(exp)
+      default:
+        return unknowOpError(op)
+    }
+  }
+
+  evalInfixExpression(op: string, left: MObject, right: MObject): MObject {
+    switch (true) {
+      case left.type() === ObjectType.INTEGER_OBJ || right.type() === ObjectType.INTEGER_OBJ:
+        return this.evalIntegerInfixExpression(op, left, right)
+      case op === "==":
+        return this.nativeBoolToBooleanObject(left == right)
+      case op === "!=":
+        return this.nativeBoolToBooleanObject(left != right)
+      default:
+        return unknowOpError(op, left, right)
+    }
+  }
+
+  evalBlockStatements(block: BlockStatement, env: Environment): MObject {
+    let result = NULL;
+    for (const stmt of block.statements) {
+      result = this.eval(stmt, env)
+      if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
+        return result
+      }
+    }
+    return result
+  }
+
+  evalIfExpression(cond: MObject, conseq: Node, alter: Optional<Node>, env: Environment): MObject {
+    if (this.isTruthy(cond)) {
+      return this.eval(conseq, env)
+    } else if (alter !== null) {
+      return this.eval(alter, env)
+    }
+    return NULL
+  }
+
+  evalLetStatement(ast: LetStatement, env: Environment): MObject {
+    const val = this.eval(ast.value as Expression, env)
+    if (this.isError(val)) {
+      return val
+    }
+    env.set(ast.name.value, val)
+    return NULL
+  }
+
+  evalIdentifier(ast: Identifier, env: Environment): MObject {
+    const idVal = env.get(ast.value)
+    if (!idVal) {
+      return identifierNotFoundError(idVal)
+    }
+    return idVal
+  }
+
+  evalFunctionLiteral(ast: FunctionLiteral, env: Environment): MObject {
+    return new FunctionO(ast.parameters, ast.body, env)
   }
 
   evalCallExpression(ast: CallExpression, env: Environment): MObject {
@@ -97,86 +169,6 @@ export default class Interpreter {
     return result
   }
 
-  evalFunctionLiteral(ast: FunctionLiteral, env: Environment): MObject {
-    return new FunctionO(ast.parameters, ast.body, env)
-  }
-
-  evalLetStatement(ast: LetStatement, env: Environment): MObject {
-    const val = this.eval(ast.value as Expression, env)
-    if (this.isError(val)) {
-      return val
-    }
-    env.set(ast.name.value, val)
-    return NULL
-  }
-
-  evalIdentifier(ast: Identifier, env: Environment): MObject {
-    const idVal = env.get(ast.value)
-    if (!idVal) {
-      return IDENTIFIER_NOT_FOUND(ast.value)
-    }
-    return idVal
-  }
-
-  evalBlockStatements(block: BlockStatement, env: Environment): MObject {
-    let result = NULL;
-    for (const stmt of block.statements) {
-      result = this.eval(stmt, env)
-      if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
-        return result
-      }
-    }
-    return result
-  }
-
-  nativeBoolToBooleanObject(val: boolean) {
-    return val ? TRUE : FALSE
-  }
-
-  evalProgram(stmts: Array<Statement>, env: Environment): MObject {
-    let result: MObject = new NullO();
-    for (const stmt of stmts) {
-      result = this.eval(stmt, env)
-      if (result.type() === ObjectType.RETURN_OBJ || result.type() === ObjectType.ERROR_OBJ) {
-        return result;
-      }
-    }
-    return result;
-  }
-
-  evalPrefixExpresion(op: string, exp: MObject): MObject {
-    switch (op) {
-      case "!":
-        return this.evalBangOperatorExpression(exp)
-      case "-":
-        return this.evalMinusPrefixOperatorExpression(exp)
-      default:
-        return new ErrorO(`unknown operator: ${op}`)
-    }
-  }
-
-  evalIfExpression(cond: MObject, conseq: Node, alter: Optional<Node>, env: Environment): MObject {
-    if (this.isTruthy(cond)) {
-      return this.eval(conseq, env)
-    } else if (alter !== null) {
-      return this.eval(alter, env)
-    }
-    return NULL
-  }
-
-  isTruthy(obj: MObject): boolean {
-    switch (obj) {
-      case NULL:
-        return false
-      case TRUE:
-        return true
-      case FALSE:
-        return false
-      default:
-        return true
-    }
-  }
-
   evalBangOperatorExpression(exp: MObject): MObject {
     switch (exp) {
       case TRUE:
@@ -194,19 +186,6 @@ export default class Interpreter {
       return new ErrorO(`unknown operator: ${exp.type().toString()}`)
     }
     return new IntegerO((exp as IntegerO).value * -1)
-  }
-
-  evalInfixExpression(op: string, left: MObject, right: MObject): MObject {
-    switch (true) {
-      case left.type() === ObjectType.INTEGER_OBJ || right.type() === ObjectType.INTEGER_OBJ:
-        return this.evalIntegerInfixExpression(op, left, right)
-      case op === "==":
-        return this.nativeBoolToBooleanObject(left == right)
-      case op === "!=":
-        return this.nativeBoolToBooleanObject(left != right)
-      default:
-        return new ErrorO(`unkown operator: ${left.type()} ${op} ${right.type()}`)
-    }
   }
 
   evalIntegerInfixExpression(op: string, left: MObject, right: MObject) {
@@ -236,7 +215,30 @@ export default class Interpreter {
       case "!=":
         return this.nativeBoolToBooleanObject(leftValue != rightValue)
       default:
-        return new ErrorO(`unknown operator: ${left.type()} ${op} ${right.type()}`)
+        return unknowOpError(op, left, right)
     }
   }
+
+  isError(obj: MObject): boolean {
+    return obj.type() === ObjectType.ERROR_OBJ
+  }
+
+  nativeBoolToBooleanObject(val: boolean) {
+    return val ? TRUE : FALSE
+  }
+
+  isTruthy(obj: MObject): boolean {
+    switch (obj) {
+      case NULL:
+        return false
+      case TRUE:
+        return true
+      case FALSE:
+        return false
+      default:
+        return true
+    }
+  }
+
+
 }
