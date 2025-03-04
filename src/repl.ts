@@ -14,7 +14,7 @@ function askQuestion(query: string): Promise<string> {
 export default async function repl() {
 
   const MAIN_PROMPT = "> ";
-  const environment = new Environment()
+  const environment = new Environment(null)
   while (true) {
     const input = await askQuestion(MAIN_PROMPT)
     if (input === ":q") {

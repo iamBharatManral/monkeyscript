@@ -9,7 +9,7 @@ describe('testing interpreter', () => {
     const input = `5;`
     const lexer = new Lexer(input)
     const parser = new Parser(lexer)
-    const env = new Environment()
+    const env = new Environment(null)
     const pg = parser.parse()
     const interpreter = new Interpreter()
     const result = interpreter.eval(pg, env)
@@ -21,7 +21,7 @@ describe('testing interpreter', () => {
     const lexer = new Lexer(input)
     const parser = new Parser(lexer)
     const pg = parser.parse()
-    const env = new Environment()
+    const env = new Environment(null)
     const interpreter = new Interpreter()
     const result = interpreter.eval(pg, env)
     assert.deepStrictEqual(result.inspect(), "true")
@@ -62,7 +62,7 @@ describe('testing interpreter', () => {
       const lexer = new Lexer(input.input)
       const parser = new Parser(lexer)
       const pg = parser.parse()
-      const env = new Environment()
+      const env = new Environment(null)
       const interpreter = new Interpreter()
       const result = interpreter.eval(pg, env)
       assert.deepStrictEqual(result.inspect(), input.output)
@@ -157,7 +157,7 @@ describe('testing interpreter', () => {
       const lexer = new Lexer(input.input)
       const parser = new Parser(lexer)
       const pg = parser.parse()
-      const env = new Environment()
+      const env = new Environment(null)
       const interpreter = new Interpreter()
       const result = interpreter.eval(pg, env)
       assert.deepStrictEqual(result.inspect(), input.output)
@@ -200,7 +200,7 @@ describe('testing interpreter', () => {
       const lexer = new Lexer(input.input)
       const parser = new Parser(lexer)
       const pg = parser.parse()
-      const env = new Environment()
+      const env = new Environment(null)
       const interpreter = new Interpreter()
       const result = interpreter.eval(pg, env)
       assert.deepStrictEqual(result.inspect(), input.output)
@@ -231,7 +231,7 @@ describe('testing interpreter', () => {
       const lexer = new Lexer(input.input)
       const parser = new Parser(lexer)
       const pg = parser.parse()
-      const env = new Environment()
+      const env = new Environment(null)
       const interpreter = new Interpreter()
       const result = interpreter.eval(pg, env)
       assert.deepStrictEqual(result.inspect(), input.output)
@@ -266,7 +266,46 @@ describe('testing interpreter', () => {
       const lexer = new Lexer(input.input)
       const parser = new Parser(lexer)
       const pg = parser.parse()
-      const env = new Environment()
+      const env = new Environment(null)
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg, env)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
+
+  test('eval of function call', () => {
+    const tests = [
+      {
+        input: "let identity = fn(x) { x; }; identity(5);",
+        output: "5"
+      },
+      {
+        input: "let identity = fn(x) { return x; }; identity(5);",
+        output: "5"
+      },
+      {
+        input: "let double = fn(x) { x * 2; }; double(5);",
+        output: "10"
+      },
+      {
+        input: "let add = fn(x, y) { x + y; }; add(5, 5);",
+        output: "10"
+      },
+      {
+        input: "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));",
+        output: "20"
+      },
+      {
+        input: "fn(x) { x; }(5)",
+        output: "5"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const env = new Environment(null)
       const interpreter = new Interpreter()
       const result = interpreter.eval(pg, env)
       assert.deepStrictEqual(result.inspect(), input.output)

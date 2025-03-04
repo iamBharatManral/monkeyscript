@@ -1,7 +1,7 @@
-import { BlockStatement, BooleanLiternal, Expression, ExpressionStatement, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
+import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, Statement } from '../frontend/ast'
 import { Optional } from '../types'
 import Environment from './environment'
-import { Integer, Null, Object, Boolean, ObjectType, Return, Error } from './object'
+import { Integer, Null, Object, Boolean, ObjectType, Return, Error, Function } from './object'
 
 const TRUE = new Boolean(true)
 const FALSE = new Boolean(false)
@@ -35,6 +35,10 @@ export default class Interpreter {
         return this.evalLetStatement(ast, env)
       case ast instanceof Identifier:
         return this.evalIdentifier(ast, env)
+      case ast instanceof FunctionLiteral:
+        return this.evalFunctionLiteral(ast, env)
+      case ast instanceof CallExpression:
+        return this.evalCallExpression(ast, env)
       default:
         return NULL;
     }
@@ -42,6 +46,56 @@ export default class Interpreter {
 
   isError(obj: Object): boolean {
     return obj.type() === ObjectType.ERROR_OBJ
+  }
+
+  evalCallExpression(ast: CallExpression, env: Environment): Object {
+    const func = this.eval(ast.fn, env)
+    if (this.isError(func)) {
+      return func
+    }
+    const args = this.evalExpressions(ast.args, env)
+    return args.some(arg => this.isError(arg)) ? (args.find(arg => this.isError(arg)) as Object) : this.applyFunction(func, args)
+
+  }
+
+  applyFunction(func: Object, args: Array<Object>): Object {
+    if (func.type() !== ObjectType.FUNCTION_OBJ) {
+      return new Error(`not a function ${func.type()}`)
+    }
+    const extendedFuncEnv = this.extendFunctionEnv(func as Function, args)
+    const val = this.eval((func as Function).body as BlockStatement, extendedFuncEnv)
+    return this.unwrapReturnValue(val)
+  }
+
+  unwrapReturnValue(val: Object): Object {
+    if (val.type() === ObjectType.RETURN_OBJ) {
+      return (val as Return).value
+    }
+    return val
+  }
+
+  extendFunctionEnv(fn: Function, args: Array<Object>): Environment {
+    const newEnv = new Environment(fn.env)
+    for (const idx in fn.parameters) {
+      newEnv.set(fn.parameters[idx].value, args[idx])
+    }
+    return newEnv
+  }
+
+  evalExpressions(exps: Array<Expression>, env: Environment): Array<Object> {
+    const result = []
+    for (const exp of exps) {
+      const expVal = this.eval(exp, env)
+      if (this.isError(expVal)) {
+        return [expVal]
+      }
+      result.push(expVal)
+    }
+    return result
+  }
+
+  evalFunctionLiteral(ast: FunctionLiteral, env: Environment): Object {
+    return new Function(ast.parameters, ast.body, env)
   }
 
   evalLetStatement(ast: LetStatement, env: Environment): Object {

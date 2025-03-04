@@ -1,7 +1,12 @@
+import { BlockStatement, Identifier } from "../frontend/ast"
+import { Optional } from "../types"
+import Environment from "./environment"
+
 export enum ObjectType {
   INTEGER_OBJ = "INTEGER",
   BOOLEAN_OBJ = "BOOLEAN",
   RETURN_OBJ = "RETURN_VALUE",
+  FUNCTION_OBJ = "FUNCTION",
   NULL_OBJ = "NULL",
   ERROR_OBJ = "ERROR_MESSAGE"
 }
@@ -38,4 +43,10 @@ export class Error implements Object {
   constructor(public message: string) { }
   type(): ObjectType { return ObjectType.ERROR_OBJ }
   inspect(): string { return this.message }
+}
+
+export class Function implements Object {
+  constructor(public parameters: Array<Identifier>, public body: Optional<BlockStatement>, public env: Environment) { }
+  type(): ObjectType { return ObjectType.FUNCTION_OBJ }
+  inspect(): string { return ObjectType.FUNCTION_OBJ }
 }
