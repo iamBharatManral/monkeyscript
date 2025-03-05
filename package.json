@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node src/main.ts",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "repository": {
     "type": "git",

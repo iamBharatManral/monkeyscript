@@ -452,5 +452,52 @@ describe('testing interpreter', () => {
 
     }
   })
+
+  test('eval of hash', () => {
+    const tests = [
+      {
+        input: `{"foo": 5}`,
+        output: `{ "hash" }`
+      },
+      {
+        input: `{"foo": 5}["foo"]`,
+        output: "5"
+      },
+      {
+        input: `{"foo": 5}["bar"]`,
+        output: "null"
+      },
+      {
+        input: `let key = "foo"; {"foo": 5}[key]`,
+        output: "5"
+      },
+      {
+        input: `{}["foo"]`,
+        output: "null"
+      },
+      {
+        input: `{5: 5}[5]`,
+        output: "5"
+      },
+      {
+        input: `{true: 5}[true]`,
+        output: "5"
+      },
+      {
+        input: `{false: 5}[false]`,
+        output: "5"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const env = new Environment(null)
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg, env)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
 })
 

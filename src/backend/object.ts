@@ -12,6 +12,7 @@ export enum ObjectType {
   STRING_OBJ = "STRING",
   NULL_OBJ = "NULL",
   ARRAY_OBJ = "ARRAY",
+  HASH_OBJ = "HASH",
   ERROR_OBJ = "ERROR_MESSAGE",
   BUILTIN_FN = "BUILTIN"
 }
@@ -72,4 +73,23 @@ export class ArrayO implements MObject {
   constructor(public elements: Array<MObject>) { }
   type(): ObjectType { return ObjectType.ARRAY_OBJ }
   inspect(): string { return `[${this.elements.map(obj => obj.inspect()).join(', ')}]` }
+}
+
+export class HashO implements MObject {
+  constructor(public pairs: Map<string, MObject>) { }
+
+  type(): ObjectType { return ObjectType.HASH_OBJ }
+  inspect(): string { return `{ "hash" }` }
+
+  set(key: string, value: MObject) {
+    this.pairs.set(key, value);
+  }
+
+  get(key: string) {
+    return this.pairs.get(key);
+  }
+
+  has(key: string) {
+    return this.pairs.has(key)
+  }
 }

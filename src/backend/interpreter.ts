@@ -1,9 +1,9 @@
-import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, StringLiteral } from '../frontend/ast'
+import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, HashLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, StringLiteral } from '../frontend/ast'
 import { argumentMismatchError, identifierNotFoundError, indexOpNotSupportedError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
 import { builtins } from './builtins'
 import Environment from './environment'
-import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO, ArrayO } from './object'
+import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO, ArrayO, HashO } from './object'
 
 const TRUE = new BooleanO(true)
 const FALSE = new BooleanO(false)
@@ -46,6 +46,8 @@ export default class Interpreter {
         return this.evalArrayLiteral(ast, env)
       case ast instanceof IndexExpression:
         return this.evalIndexExpression(ast, env)
+      case ast instanceof HashLiteral:
+        return this.evalHashLiteral(ast, env)
       default:
         return NULL;
     }
@@ -190,9 +192,36 @@ export default class Interpreter {
     switch (true) {
       case left.type() === ObjectType.ARRAY_OBJ && index.type() === ObjectType.INTEGER_OBJ:
         return this.evalArrayIndexExpression(left, index)
+      case left.type() === ObjectType.HASH_OBJ:
+        return this.evalHashIndexExpression(left, index)
       default:
         return indexOpNotSupportedError(left)
     }
+  }
+
+  evalHashIndexExpression(hash: MObject, index: MObject): MObject {
+    const hashObj = hash as HashO;
+    const value = hashObj.pairs.get(index.inspect())
+    if (!value) {
+      return NULL
+    }
+    return value
+  }
+
+  evalHashLiteral(ast: HashLiteral, env: Environment): MObject {
+    const pairs = new Map<string, MObject>()
+    for (const key of ast.pairs.keys()) {
+      const keyO = this.eval(key, env)
+      if (!keyO) {
+        return NULL
+      }
+      const valueO = this.eval(ast.pairs.get(key) as Expression, env)
+      if (!valueO) {
+        return NULL
+      }
+      pairs.set(keyO.inspect(), valueO)
+    }
+    return new HashO(pairs)
   }
 
   evalArrayIndexExpression(left: MObject, index: MObject): MObject {

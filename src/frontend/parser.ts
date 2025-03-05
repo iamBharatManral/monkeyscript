@@ -1,6 +1,6 @@
 import { Optional } from "../types";
-import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement, StringLiteral } from "./ast";
-import { expectAssignOpError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightBracketError, expectRightParenError } from "./error";
+import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, HashLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement, StringLiteral } from "./ast";
+import { expectAssignOpError, expectColonError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightBraceError, expectRightBracketError, expectRightParenError, syntaxError } from "./error";
 import Lexer from "./lexer";
 import { Precedence, PrecedenceTable, Token, TokenType } from "./token";
 
@@ -29,6 +29,7 @@ export default class Parser {
     this.registerPrefixFunc(TokenType.IF, this.parseIfExpression)
     this.registerPrefixFunc(TokenType.FUNCTION, this.parseFunctionLiteral)
     this.registerPrefixFunc(TokenType.LBRACK, this.parseArrayLiteral)
+    this.registerPrefixFunc(TokenType.LBRACE, this.parseHashLiteral)
     this.registerInfixFunc(TokenType.LBRACK, this.parseIndexExpression)
     this.registerInfixFunc(TokenType.LPAREN, this.parseCallExpression)
     this.registerInfixFunc(TokenType.PLUS, this.parseInfixExpression)
@@ -222,6 +223,45 @@ export default class Parser {
   private parseArrayLiteral(): Optional<ArrayLiteral> {
     const exprs = this.parseExpressionList(TokenType.RBRACK)
     return new ArrayLiteral(exprs)
+  }
+
+  private parseHashLiteral(): Optional<Expression> {
+    const pairs = new Map<Expression, Expression>();
+    while (!this.peekTokenIs(TokenType.RBRACE)) {
+      // consume left brace
+      this.nextToken()
+      const key = this.parseExpression(Precedence.LOWEST)
+
+      if (!key) {
+        this.errors.push(expectExpressionError(this.curToken))
+        return null
+      }
+
+      if (!this.expectPeek(TokenType.COLON)) {
+        this.errors.push(expectColonError(this.peekToken))
+        return null
+      }
+      // consume colon
+      this.nextToken()
+
+      const value = this.parseExpression(Precedence.LOWEST)
+      if (!value) {
+        this.errors.push(expectExpressionError(this.curToken))
+        return null
+      }
+
+      pairs.set(key, value)
+
+      if (!this.peekTokenIs(TokenType.RBRACE) && !this.expectPeek(TokenType.COMMA)) {
+        this.errors.push(syntaxError(`expected: either right brace or comma, got: `, this.peekToken))
+        return null
+      }
+    }
+    if (!this.expectPeek(TokenType.RBRACE)) {
+      this.errors.push(expectRightBraceError(this.peekToken))
+      return null
+    }
+    return new HashLiteral(pairs)
   }
 
   private parseExpressionList(end: TokenType): Array<Expression> {

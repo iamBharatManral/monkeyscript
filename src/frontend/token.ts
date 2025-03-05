@@ -33,6 +33,7 @@ export enum TokenType {
   RBRACE = "}",
   LBRACK = "[",
   RBRACK = "]",
+  COLON = ":",
 
   FUNCTION = "FN",
   LET = "LET",

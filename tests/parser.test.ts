@@ -1,4 +1,4 @@
-import { Statement, LetStatement, Identifier, IntegerLiteral, ReturnStatment, ExpressionStatement, PrefixExpression, InfixExpression, BooleanLiternal, IfExpression, BlockStatement, FunctionLiteral, CallExpression, Expression, StringLiteral, ArrayLiteral, IndexExpression } from "../src/frontend/ast";
+import { Statement, LetStatement, Identifier, IntegerLiteral, ReturnStatment, ExpressionStatement, PrefixExpression, InfixExpression, BooleanLiternal, IfExpression, BlockStatement, FunctionLiteral, CallExpression, StringLiteral, ArrayLiteral, IndexExpression, HashLiteral } from "../src/frontend/ast";
 import Lexer from "../src/frontend/lexer";
 import Parser from "../src/frontend/parser";
 import assert from 'assert'
@@ -251,6 +251,27 @@ describe('test parser', () => {
     const expected: Array<Statement> = [
       new ExpressionStatement(new ArrayLiteral([new IntegerLiteral(1), new InfixExpression(new IntegerLiteral(2), "*", new IntegerLiteral(2)), new InfixExpression(new IntegerLiteral(3), "+", new IntegerLiteral(3))])),
       new ExpressionStatement(new IndexExpression(new Identifier("myArray"), new InfixExpression(new IntegerLiteral(1), "+", new IntegerLiteral(1))))
+    ];
+    assert.deepStrictEqual(pg.statements, expected)
+  })
+
+  it('test hash', () => {
+    const input = `
+    {"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}
+    {}
+    `;
+    const lexer = new Lexer(input);
+    const parser = new Parser(lexer);
+    const pg = parser.parse();
+
+    const pairs = new Map();
+    pairs.set(new StringLiteral("one"), new InfixExpression(new IntegerLiteral(0), "+", new IntegerLiteral(1)));
+    pairs.set(new StringLiteral("two"), new InfixExpression(new IntegerLiteral(10), "-", new IntegerLiteral(8)));
+    pairs.set(new StringLiteral("three"), new InfixExpression(new IntegerLiteral(15), "/", new IntegerLiteral(5)));
+
+    const expected: Array<Statement> = [
+      new ExpressionStatement(new HashLiteral(pairs)),
+      new ExpressionStatement(new HashLiteral(new Map()))
     ];
     assert.deepStrictEqual(pg.statements, expected)
   })

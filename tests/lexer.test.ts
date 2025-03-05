@@ -205,6 +205,26 @@ describe('testing lexer', () => {
 
   })
 
+  test('hash tokens', () => {
+    const input = `
+    {"foo": "bar"}
+                   `;
+    const expected: Array<Token> = [
+      new Token(TokenType.LBRACE, "{"),
+      new Token(TokenType.STRING, "foo"),
+      new Token(TokenType.COLON, ":"),
+      new Token(TokenType.STRING, "bar"),
+      new Token(TokenType.RBRACE, "}"),
+      new Token(TokenType.EOF, ""),
+    ];
+
+    const lexer = new Lexer(input);
+    const got = generateTokens(lexer);
+
+    assert.deepStrictEqual(got, expected)
+
+  })
+
 })
 
 function generateTokens(lexer: Lexer) {

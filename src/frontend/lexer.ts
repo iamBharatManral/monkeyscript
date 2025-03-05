@@ -81,6 +81,9 @@ export default class Lexer {
       case "]":
         token = new Token(TokenType.RBRACK, this.char)
         break
+      case ":":
+        token = new Token(TokenType.COLON, this.char)
+        break
       case '"':
         token = this.readString()
         break

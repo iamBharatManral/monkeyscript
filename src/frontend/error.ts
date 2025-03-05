@@ -32,6 +32,10 @@ export function expectRightBracketError(got: Token): string {
   return syntaxError(TokenType.RBRACK, got)
 }
 
+export function expectColonError(got: Token): string {
+  return syntaxError(TokenType.COLON, got)
+}
+
 export function expectExpressionError(got: Token): string {
   return syntaxError("expression", got)
 }

@@ -81,6 +81,14 @@ export class ArrayLiteral extends Expression {
     return `${this.elements}`
   }
 }
+
+export class HashLiteral extends Expression {
+  constructor(public pairs: Map<Expression, Expression>) { super() }
+  toString(): string {
+    return `{ "hash" }`
+  }
+}
+
 export class PrefixExpression extends Expression {
   constructor(public operator: string, public right: Expression) { super() }
   toString(): string {
