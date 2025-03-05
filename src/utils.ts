@@ -6,6 +6,7 @@ export function header() {
   console.log(colors.white("█   █ ▀▄▄▄▀ █   █ █ ▀▄ ▝▚▄▄▖ ▀▀▀█ ▄▄▄▀     █    █ █▄▄▄▀   ▐▌  "));
   console.log(colors.red("                  █  █      ▄   █               █ █       ▐▌  "));
   console.log(colors.green("                             ▀▀▀                  ▀       ▐▌  "));
+  console.log();
 }
 
 export function usage() {
