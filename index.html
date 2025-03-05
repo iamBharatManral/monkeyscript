@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Programming Language (Typescript Edition)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monkey Programming Language Overview</h1>
+
+    <p>The Monkey programming language is a simple, interpreted language designed primarily for educational purposes. It was introduced in Thorsten Ball's book, <em>Writing an Interpreter in Go</em>, which guides readers through building an interpreter for Monkey from scratch. </p>
+
+    <h2>Key Features</h2>
+    <ul>
+        <li><strong>Dynamic Typing:</strong> Variables in Monkey are dynamically typed, allowing for flexibility in assigning different types of values.</li>
+        <li><strong>First-Class Functions:</strong> Functions are first-class citizens in Monkey, meaning they can be assigned to variables, passed as arguments, and returned from other functions.</li>
+        <li><strong>Lexical Scoping:</strong> Monkey utilizes lexical scoping rules, where the scope of a variable is determined by its position within the source code.</li>
+    </ul>
+
+    <h2>Basic Syntax and Examples</h2>
+
+    <h3>1. Variables and Data Types</h3>
+    <p>Monkey supports several basic data types, including integers, booleans, strings, arrays, and hashes.</p>
+    <pre><code>// Integer
+let age = 25;
+
+// Boolean
+let isStudent = true;
+
+// String
+let name = "Monkey programming language";
+
+// Array
+let myArray = [1, 2, 3, 4, 5];
+
+// Hash
+let person = {"name": "Anna", "age": 25};
+</code></pre>
+
+    <h3>2. Functions</h3>
+    <p>Functions in Monkey are declared using the <code>fn</code> keyword and can be assigned to variables.</p>
+    <pre><code>// Function declaration
+let add = fn(a, b) {
+    a + b; // Implicit return
+};
+
+// Function invocation
+let result = add(2, 3); // result is 5
+</code></pre>
+
+    <h3>3. Conditionals</h3>
+    <p>Conditional statements in Monkey use the <code>if</code> keyword, optionally followed by an <code>else</code> block.</p>
+    <pre><code>let number = 10;
+
+if (number > 5) {
+    "Greater than 5"; // Implicit return
+} else {
+    "5 or less"; // Implicit return
+}
+</code></pre>
+
+    <h3>4. Recursion</h3>
+    <p>Monkey supports recursive function calls, allowing functions to call themselves.</p>
+    <pre><code>// Define a `fibonacci` function
+let fibonacci = fn(x) {
+    if (x == 0) {
+        0; // Implicit return
+    } else {
+        if (x == 1) {
+            return 1; // Explicit return
+        } else {
+            fibonacci(x - 1) + fibonacci(x - 2); // Recursion
+        }
+    }
+};
+
+// Function invocation
+let result = fibonacci(5); // result is 5
+</code></pre>
+
+    <h2>Implementations and Resources</h2>
+    <p>For those interested in exploring the Monkey programming language further, Thorsten Ball's book, <em>Writing an Interpreter in Go</em>, provides an in-depth guide to building an interpreter for Monkey from scratch. </p>
+
+   
+</body>
+</html>
