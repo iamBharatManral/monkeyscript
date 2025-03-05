@@ -76,5 +76,12 @@ export const builtins: Record<string, MObject> = {
 
     const objArr = args[0] as ArrayO;
     return new ArrayO([...objArr.elements, args[1]])
+  }),
+
+  puts: new BuiltinFunctionO(function(...args: Array<MObject>): MObject {
+    for (const arg of args) {
+      console.log(arg.inspect())
+    }
+    return new NullO()
   })
 }
