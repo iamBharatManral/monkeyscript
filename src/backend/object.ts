@@ -22,22 +22,29 @@ export interface MObject {
   inspect(): string
 }
 
-export class IntegerO implements MObject {
+export interface Hashable {
+  hashKey(): any
+}
+
+export class IntegerO implements MObject, Hashable {
   constructor(public value: number) { }
   type(): ObjectType { return ObjectType.INTEGER_OBJ }
   inspect(): string { return `${this.value}` }
+  hashKey(): number { return this.value }
 }
 
-export class BooleanO implements MObject {
+export class BooleanO implements MObject, Hashable {
   constructor(public value: boolean) { }
   type(): ObjectType { return ObjectType.BOOLEAN_OBJ }
   inspect(): string { return `${this.value}` }
+  hashKey(): boolean { return this.value }
 }
 
-export class StringO implements MObject {
+export class StringO implements MObject, Hashable {
   constructor(public value: string) { }
   type(): ObjectType { return ObjectType.STRING_OBJ }
   inspect(): string { return this.value }
+  hashKey(): string { return this.value }
 }
 
 export class NullO implements MObject {
@@ -76,20 +83,20 @@ export class ArrayO implements MObject {
 }
 
 export class HashO implements MObject {
-  constructor(public pairs: Map<string, MObject>) { }
+  constructor(public pairs: Map<any, MObject>) { }
 
   type(): ObjectType { return ObjectType.HASH_OBJ }
   inspect(): string { return `{ "hash" }` }
 
-  set(key: string, value: MObject) {
+  set(key: any, value: MObject) {
     this.pairs.set(key, value);
   }
 
-  get(key: string) {
+  get(key: any) {
     return this.pairs.get(key);
   }
 
-  has(key: string) {
+  has(key: any) {
     return this.pairs.has(key)
   }
 }

@@ -44,6 +44,10 @@ export function expectIdentifierError(got: Token): string {
   return syntaxError(TokenType.IDENT, got)
 }
 
+export function expectHashableKeyError(got: MObject): MObject {
+  return new ErrorO(`expected hashable key, got: '${got.inspect()}'`);
+}
+
 export function unknowOpError(op: string, left: Optional<MObject> = null, right: Optional<MObject> = null): MObject {
   if (!left && !right) {
     return new ErrorO(`unknown unary operator: ${op}`)

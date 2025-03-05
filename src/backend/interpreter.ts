@@ -1,9 +1,9 @@
 import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, HashLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, StringLiteral } from '../frontend/ast'
-import { argumentMismatchError, identifierNotFoundError, indexOpNotSupportedError, unknowOpError } from '../frontend/error'
+import { argumentMismatchError, expectHashableKeyError, identifierNotFoundError, indexOpNotSupportedError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
 import { builtins } from './builtins'
 import Environment from './environment'
-import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO, ArrayO, HashO } from './object'
+import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO, ArrayO, HashO, Hashable } from './object'
 
 const TRUE = new BooleanO(true)
 const FALSE = new BooleanO(false)
@@ -201,7 +201,7 @@ export default class Interpreter {
 
   evalHashIndexExpression(hash: MObject, index: MObject): MObject {
     const hashObj = hash as HashO;
-    const value = hashObj.pairs.get(index.inspect())
+    const value = hashObj.pairs.get((index as unknown as Hashable).hashKey())
     if (!value) {
       return NULL
     }
@@ -209,17 +209,20 @@ export default class Interpreter {
   }
 
   evalHashLiteral(ast: HashLiteral, env: Environment): MObject {
-    const pairs = new Map<string, MObject>()
+    const pairs = new Map<any, MObject>()
     for (const key of ast.pairs.keys()) {
       const keyO = this.eval(key, env)
       if (!keyO) {
         return NULL
       }
+      if (!this.isHashable(keyO)) {
+        return expectHashableKeyError(keyO)
+      }
       const valueO = this.eval(ast.pairs.get(key) as Expression, env)
       if (!valueO) {
         return NULL
       }
-      pairs.set(keyO.inspect(), valueO)
+      pairs.set((keyO as unknown as Hashable).hashKey(), valueO)
     }
     return new HashO(pairs)
   }
@@ -305,6 +308,10 @@ export default class Interpreter {
       default:
         return unknowOpError(op, left, right)
     }
+  }
+
+  isHashable(obj: any): obj is Hashable {
+    return typeof obj === "object" && obj !== null && "hashKey" in obj && typeof obj.hashKey === "function";
   }
 
   isError(obj: MObject): boolean {
