@@ -62,3 +62,4 @@ export function argumentNotSupportedError(fnName: string, expected: ObjectType, 
 export function indexOpNotSupportedError(left: MObject) {
   return new ErrorO(`index operator not supported: ${left.type()}`);
 }
+

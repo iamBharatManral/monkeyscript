@@ -71,5 +71,5 @@ export class BuiltinFunctionO implements MObject {
 export class ArrayO implements MObject {
   constructor(public elements: Array<MObject>) { }
   type(): ObjectType { return ObjectType.ARRAY_OBJ }
-  inspect(): string { return `${this.elements}` }
+  inspect(): string { return `[${this.elements.map(obj => obj.inspect()).join(', ')}]` }
 }

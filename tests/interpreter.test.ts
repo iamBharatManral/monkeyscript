@@ -357,6 +357,38 @@ describe('testing interpreter', () => {
         input: `len("one","two")`,
         output: "arguments mismatch, expected: 1, got: 2"
       },
+      {
+        input: `let a = [1, 2, 3, 4]; first(a);`,
+        output: "1"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; last(a);`,
+        output: "4"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; rest(a);`,
+        output: "[2, 3, 4]"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; rest(rest(a));`,
+        output: "[3, 4]"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; rest(rest(rest(a)));`,
+        output: "[4]"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; rest(rest(rest(rest(a))));`,
+        output: "[]"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; rest(rest(rest(rest(rest(a)))));`,
+        output: "null"
+      },
+      {
+        input: `let a = [1, 2, 3, 4]; push(a, 5);`,
+        output: "[1, 2, 3, 4, 5]"
+      },
     ]
     for (const input of tests) {
       const lexer = new Lexer(input.input)
