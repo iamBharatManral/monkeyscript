@@ -11,6 +11,7 @@ export enum ObjectType {
   FUNCTION_OBJ = "FUNCTION",
   STRING_OBJ = "STRING",
   NULL_OBJ = "NULL",
+  ARRAY_OBJ = "ARRAY",
   ERROR_OBJ = "ERROR_MESSAGE",
   BUILTIN_FN = "BUILTIN"
 }
@@ -65,4 +66,10 @@ export class BuiltinFunctionO implements MObject {
   constructor(public fn: BuiltinFunc) { }
   type(): ObjectType { return ObjectType.BUILTIN_FN }
   inspect(): string { return `builtin function` }
+}
+
+export class ArrayO implements MObject {
+  constructor(public elements: Array<MObject>) { }
+  type(): ObjectType { return ObjectType.ARRAY_OBJ }
+  inspect(): string { return `${this.elements}` }
 }

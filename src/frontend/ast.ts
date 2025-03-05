@@ -75,6 +75,12 @@ export class StringLiteral extends Expression {
   }
 }
 
+export class ArrayLiteral extends Expression {
+  constructor(public elements: Array<Expression>) { super() }
+  toString(): string {
+    return `${this.elements}`
+  }
+}
 export class PrefixExpression extends Expression {
   constructor(public operator: string, public right: Expression) { super() }
   toString(): string {
@@ -107,5 +113,12 @@ export class CallExpression extends Expression {
   constructor(public fn: Expression, public args: Array<Expression>) { super() }
   toString(): string {
     return `${this.fn.toString()} ( ${this.args.toString()} )`
+  }
+}
+
+export class IndexExpression extends Expression {
+  constructor(public left: Expression, public index: Expression) { super() }
+  toString(): string {
+    return `${this.left.toString()} [ ${this.index.toString()} ]`
   }
 }

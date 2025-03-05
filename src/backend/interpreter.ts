@@ -1,9 +1,9 @@
-import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, StringLiteral } from '../frontend/ast'
-import { argumentMismatchError, identifierNotFoundError, unknowOpError } from '../frontend/error'
+import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, IntegerLiteral, LetStatement, Node, PrefixExpression, Program, ReturnStatment, StringLiteral } from '../frontend/ast'
+import { argumentMismatchError, identifierNotFoundError, indexOpNotSupportedError, unknowOpError } from '../frontend/error'
 import { Optional } from '../types'
 import { builtins } from './builtins'
 import Environment from './environment'
-import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO } from './object'
+import { IntegerO, NullO, MObject, BooleanO, ObjectType, ReturnO, ErrorO, FunctionO, StringO, BuiltinFunctionO, ArrayO } from './object'
 
 const TRUE = new BooleanO(true)
 const FALSE = new BooleanO(false)
@@ -42,6 +42,10 @@ export default class Interpreter {
         return this.evalCallExpression(ast, env)
       case ast instanceof StringLiteral:
         return new StringO(ast.value)
+      case ast instanceof ArrayLiteral:
+        return this.evalArrayLiteral(ast, env)
+      case ast instanceof IndexExpression:
+        return this.evalIndexExpression(ast, env)
       default:
         return NULL;
     }
@@ -166,6 +170,39 @@ export default class Interpreter {
       newEnv.set(fn.parameters[idx].value, args[idx])
     }
     return newEnv
+  }
+
+  evalArrayLiteral(ast: ArrayLiteral, env: Environment): MObject {
+    const elements = this.evalExpressions(ast.elements, env)
+    return new ArrayO(elements)
+  }
+
+  evalIndexExpression(ast: IndexExpression, env: Environment): MObject {
+    const left = this.eval(ast.left, env);
+    if (this.isError(left)) {
+      return left
+    }
+
+    const index = this.eval(ast.index, env)
+    if (this.isError(index)) {
+      return left
+    }
+    switch (true) {
+      case left.type() === ObjectType.ARRAY_OBJ && index.type() === ObjectType.INTEGER_OBJ:
+        return this.evalArrayIndexExpression(left, index)
+      default:
+        return indexOpNotSupportedError(left)
+    }
+  }
+
+  evalArrayIndexExpression(left: MObject, index: MObject): MObject {
+    const idx = (index as IntegerO).value;
+    const array = (left as ArrayO);
+    const max = array.elements.length - 1;
+    if (idx < 0 || idx > max) {
+      return NULL
+    }
+    return array.elements[idx]
   }
 
   evalExpressions(exps: Array<Expression>, env: Environment): Array<MObject> {

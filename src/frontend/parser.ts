@@ -1,6 +1,6 @@
 import { Optional } from "../types";
-import { BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement, StringLiteral } from "./ast";
-import { expectAssignOpError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightParenError } from "./error";
+import { ArrayLiteral, BlockStatement, BooleanLiternal, CallExpression, Expression, ExpressionStatement, FunctionLiteral, Identifier, IfExpression, IndexExpression, InfixExpression, infixFunc, IntegerLiteral, LetStatement, PrefixExpression, prefixFunc, Program, ReturnStatment, Statement, StringLiteral } from "./ast";
+import { expectAssignOpError, expectExpressionError, expectIdentifierError, expectLeftBraceError, expectLeftParenError, expectRightBracketError, expectRightParenError } from "./error";
 import Lexer from "./lexer";
 import { Precedence, PrecedenceTable, Token, TokenType } from "./token";
 
@@ -28,6 +28,8 @@ export default class Parser {
     this.registerPrefixFunc(TokenType.STRING, this.parseStringLiteral)
     this.registerPrefixFunc(TokenType.IF, this.parseIfExpression)
     this.registerPrefixFunc(TokenType.FUNCTION, this.parseFunctionLiteral)
+    this.registerPrefixFunc(TokenType.LBRACK, this.parseArrayLiteral)
+    this.registerInfixFunc(TokenType.LBRACK, this.parseIndexExpression)
     this.registerInfixFunc(TokenType.LPAREN, this.parseCallExpression)
     this.registerInfixFunc(TokenType.PLUS, this.parseInfixExpression)
     this.registerInfixFunc(TokenType.MINUS, this.parseInfixExpression)
@@ -166,43 +168,12 @@ export default class Parser {
   }
 
   private parseCallExpression(fn: Optional<Expression>): Optional<Expression> {
-    const args = this.parseCallArguments()
+    const args = this.parseExpressionList(TokenType.RPAREN)
     if (!fn) {
       this.errors.push(expectExpressionError(new Token(TokenType.ILLEGAL, "")))
       return null
     }
     return new CallExpression(fn, args)
-  }
-
-  private parseCallArguments(): Array<Expression> {
-    const args: Array<Expression> = []
-    if (this.peekTokenIs(TokenType.RPAREN)) {
-      this.nextToken()
-      return args
-    }
-    this.nextToken()
-    const exp = this.parseExpression(Precedence.LOWEST)
-    if (!exp) {
-      this.errors.push(expectExpressionError(this.curToken))
-      return args
-    }
-
-    args.push(exp)
-
-    while (this.peekTokenIs(TokenType.COMMA)) {
-      this.nextToken()
-      this.nextToken()
-      const exp = this.parseExpression(Precedence.LOWEST)
-      if (!exp) break
-      args.push(exp)
-    }
-
-    if (!this.expectPeek(TokenType.RPAREN)) {
-      this.errors.push(expectRightParenError(this.peekToken))
-      return args
-    }
-
-    return args
   }
 
   private parseFunctionLiteral(): Optional<Expression> {
@@ -246,6 +217,62 @@ export default class Parser {
     }
 
     return params
+  }
+
+  private parseArrayLiteral(): Optional<ArrayLiteral> {
+    const exprs = this.parseExpressionList(TokenType.RBRACK)
+    return new ArrayLiteral(exprs)
+  }
+
+  private parseExpressionList(end: TokenType): Array<Expression> {
+
+    const list: Array<Expression> = []
+
+    if (this.peekTokenIs(end)) {
+      this.nextToken()
+      return list
+    }
+    this.nextToken()
+    const exp = this.parseExpression(Precedence.LOWEST)
+    if (!exp) {
+      this.errors.push(expectExpressionError(this.curToken))
+      return list
+    }
+
+    list.push(exp)
+
+    while (this.peekTokenIs(TokenType.COMMA)) {
+      this.nextToken()
+      this.nextToken()
+      const exp = this.parseExpression(Precedence.LOWEST)
+      if (!exp) break
+      list.push(exp)
+    }
+
+    if (!this.expectPeek(end)) {
+      this.errors.push(expectRightParenError(this.peekToken))
+      return list
+    }
+
+    return list
+  }
+
+  private parseIndexExpression(left: Optional<Expression>): Optional<Expression> {
+    // consume left bracket
+    this.nextToken()
+    const index = this.parseExpression(Precedence.LOWEST)
+
+    if (!left || !index) {
+      this.errors.push(expectExpressionError(this.curToken))
+      return null
+    }
+
+    if (!this.expectPeek(TokenType.RBRACK)) {
+      this.errors.push(expectRightBracketError(this.peekToken))
+      return null
+    }
+
+    return new IndexExpression(left, index)
   }
 
   private parseIfExpression(): Optional<Statement> {

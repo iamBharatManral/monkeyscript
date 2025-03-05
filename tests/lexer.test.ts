@@ -183,6 +183,28 @@ describe('testing lexer', () => {
 
   })
 
+  test('array tokens', () => {
+    const input = `
+                  [a, b, c] 
+                   `;
+    const expected: Array<Token> = [
+      new Token(TokenType.LBRACK, "["),
+      new Token(TokenType.IDENT, "a"),
+      new Token(TokenType.COMMA, ","),
+      new Token(TokenType.IDENT, "b"),
+      new Token(TokenType.COMMA, ","),
+      new Token(TokenType.IDENT, "c"),
+      new Token(TokenType.RBRACK, "]"),
+      new Token(TokenType.EOF, ""),
+    ];
+
+    const lexer = new Lexer(input);
+    const got = generateTokens(lexer);
+
+    assert.deepStrictEqual(got, expected)
+
+  })
+
 })
 
 function generateTokens(lexer: Lexer) {

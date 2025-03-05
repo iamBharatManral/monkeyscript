@@ -369,5 +369,56 @@ describe('testing interpreter', () => {
 
     }
   })
+
+  test('eval of array indexing', () => {
+    const tests = [
+      {
+        input: `[1, 2, 3][0]`,
+        output: "1"
+      },
+      {
+        input: `[1, 2, 3][1]`,
+        output: "2"
+      },
+      {
+        input: `[1, 2, 3][2]`,
+        output: "3"
+      },
+      {
+        input: `let i = 0; [1][i];`,
+        output: "1"
+      },
+      {
+        input: `let myArray = [1, 2, 3]; myArray[2];`,
+        output: "3"
+      },
+      {
+        input: `let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];`,
+        output: "6"
+      },
+      {
+        input: `let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]`,
+        output: "2"
+      },
+      {
+        input: `[1, 2, 3][3]`,
+        output: "null"
+      },
+      {
+        input: `[1, 2, 3][-1]`,
+        output: "null"
+      },
+    ]
+    for (const input of tests) {
+      const lexer = new Lexer(input.input)
+      const parser = new Parser(lexer)
+      const pg = parser.parse()
+      const env = new Environment(null)
+      const interpreter = new Interpreter()
+      const result = interpreter.eval(pg, env)
+      assert.deepStrictEqual(result.inspect(), input.output)
+
+    }
+  })
 })
 

@@ -28,6 +28,10 @@ export function expectRightBraceError(got: Token): string {
   return syntaxError(TokenType.RBRACE, got)
 }
 
+export function expectRightBracketError(got: Token): string {
+  return syntaxError(TokenType.RBRACK, got)
+}
+
 export function expectExpressionError(got: Token): string {
   return syntaxError("expression", got)
 }
@@ -53,4 +57,8 @@ export function argumentMismatchError(expected: number, got: number): MObject {
 
 export function argumentNotSupportedError(fnName: string, expected: ObjectType, got: ObjectType): MObject {
   return new ErrorO(`argument to '${fnName}' not supported, expected: ${expected}, got: ${got}`)
+}
+
+export function indexOpNotSupportedError(left: MObject) {
+  return new ErrorO(`index operator not supported: ${left.type()}`);
 }

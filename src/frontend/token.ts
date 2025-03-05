@@ -31,6 +31,8 @@ export enum TokenType {
   RPAREN = ")",
   LBRACE = "{",
   RBRACE = "}",
+  LBRACK = "[",
+  RBRACK = "]",
 
   FUNCTION = "FN",
   LET = "LET",
@@ -62,7 +64,8 @@ export enum Precedence {
   SUM = 4,
   PRODUCT = 5,
   PREFIX = 6,
-  CALL = 7
+  CALL = 7,
+  INDEX = 8,
 }
 
 export const PrecedenceTable: Partial<Record<TokenType, Precedence>> = {
@@ -78,4 +81,5 @@ export const PrecedenceTable: Partial<Record<TokenType, Precedence>> = {
   [TokenType.ASTERISK]: Precedence.PRODUCT,
   [TokenType.SLASH]: Precedence.PRODUCT,
   [TokenType.LPAREN]: Precedence.CALL,
+  [TokenType.LBRACK]: Precedence.INDEX,
 }
